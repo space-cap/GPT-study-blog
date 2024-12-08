@@ -1,14 +1,4 @@
-olefile==0.46
-omegaconf==2.3.0
-onnx==1.14.1
-onnxruntime
-openai==0.28.0
-opencv-python==4.8.0.76
-openpyxl==3.1.2
-orjson==3.9.9
-overrides==7.4.0
-packaging==23.1
-pandas==2.1.0
+pandas
 parso==0.8.3
 pathspec==0.11.2
 pathy==0.10.2
@@ -28,7 +18,7 @@ prompt-toolkit==3.0.39
 protobuf==4.24.3
 psutil==5.9.5
 ptyprocess==0.7.0
-pulsar-client==3.3.0
+pulsar-client
 pure-eval==0.2.2
 pyarrow==13.0.0
 pycocotools==2.0.7
