@@ -8,4 +8,6 @@ os.environ["OPENAI_API_KEY"] = openai_api_key
 from langchain_openai import ChatOpenAI
 
 chat = ChatOpenAI()
+b = chat.predict("How many planets are there?")
+print(b)
 
