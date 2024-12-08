@@ -5,14 +5,14 @@ import os
 load_dotenv()
 
 # 환경 변수 가져오기
-openai_api_key = os.getenv("Gemini_API_KEY")
+gemini_api_key = os.getenv("Gemini_API_KEY")
 
 # 확인
-print(f"OpenAI API Key: {openai_api_key}")
+print(f"API Key: {gemini_api_key}")
 
 import google.generativeai as genai
 
-genai.configure(api_key="YOUR_API_KEY")
+genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel("gemini-1.5-flash")
-response = model.generate_content("Explain how AI works")
+response = model.generate_content("대한민국의 수도는?")
 print(response.text)
