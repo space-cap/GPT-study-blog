@@ -1,0 +1,14 @@
+
+
+
+
+가상 환경을 만들어 준다.
+python -m venv ./env
+
+그리고 .gitignore 파일에
+/env 추가 해 준다.
+
+pip install -r requirements.txt
+
+python -m pip install --upgrade setuptools
+
