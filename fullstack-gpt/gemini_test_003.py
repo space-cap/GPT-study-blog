@@ -7,11 +7,9 @@ load_dotenv()
 # 환경 변수 가져오기
 gemini_api_key = os.getenv("Gemini_API_KEY")
 
-from langchain_google_genai import GoogleGenerativeAI
+from langchain_google_vertexai import ChatVertexAI
 
-llm = GoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=gemini_api_key)
-a = llm.invoke("대한민국 수도는?")
-print(a)
+model = ChatVertexAI(model="gemini-1.5-flash", google_api_key=gemini_api_key)
 
 
 
