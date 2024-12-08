@@ -5,7 +5,7 @@ load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 os.environ["OPENAI_API_KEY"] = openai_api_key
 
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 
 chat = ChatOpenAI()
 
