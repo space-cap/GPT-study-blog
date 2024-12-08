@@ -8,7 +8,7 @@ load_dotenv()
 gemini_api_key = os.getenv("Gemini_API_KEY")
 
 # 확인
-print(f"API Key: {gemini_api_key}")
+# print(f"API Key: {gemini_api_key}")
 
 import google.generativeai as genai
 
