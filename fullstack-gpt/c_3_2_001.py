@@ -13,13 +13,18 @@ from langchain.prompts import PromptTemplate, ChatPromptTemplate
 
 template = ChatPromptTemplate.from_messages(
     [
-        ("system", "You are a geography expert. And you only reply in Italian."),
-        ("ai", "Ciao, mi chiamo Paolo!"),
-        ("human", "What is the distance between Mexico and Thailand. Also, what is your name?")
+        ("system", "You are a geography expert. And you only reply in {language}."),
+        ("ai", "Ciao, mi chiamo {name}!"),
+        ("human", "What is the distance between {country_a} and {country_b}. Also, what is your name?")
     ]
 )
 
-prompt = template.format(country_a="Seoul", country_b="Tokyo")
+prompt = template.format(
+    language="Greek",
+    name="Socrates",
+    country_a="Seoul", 
+    country_b="Tokyo"
+)
 
 response = chat.invoke(prompt)
 print(response.content)
