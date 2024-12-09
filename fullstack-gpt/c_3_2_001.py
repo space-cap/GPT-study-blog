@@ -6,7 +6,7 @@ load_dotenv()
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-chat = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+chat = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.1)
 
 from langchain.schema import HumanMessage, AIMessage, SystemMessage
 from langchain.prompts import PromptTemplate, ChatPromptTemplate
