@@ -4,9 +4,9 @@ import os
 # .env 파일 로드
 load_dotenv()
 
-from langchain_google_genai import GoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
-chat = GoogleGenerativeAI(model="gemini-1.5-flash")
+chat = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
 
 from langchain.schema import HumanMessage, AIMessage, SystemMessage
 
@@ -18,5 +18,5 @@ messages = [
     HumanMessage(content="What is the distance between Mexico and Thailand. Also, what is your name?")
 ]
 
-chat.predict_messages(messages)
-
+response = chat.invoke(messages)
+print(response.content)
