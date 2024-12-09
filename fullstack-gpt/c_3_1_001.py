@@ -16,3 +16,5 @@ messages = [
     AIMessage(content="Ciao, mi chiamo Paolo!"),
     HumanMessage(content="What is the distance between Mexico and Thailand. Also, what is your name?")
 ]
+
+chat.predict_messages(messages)
