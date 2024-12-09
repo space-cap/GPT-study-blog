@@ -15,7 +15,7 @@ template = PromptTemplate.from_template(
     "What is the distance between {country_a} and {country_b}.",
 )
 
-prompt = template.format(country_a="Mexico", country_b="Thailand")
+prompt = template.format(country_a="Seoul", country_b="Tokyo")
 
 response = chat.invoke(prompt)
 print(response.content)
