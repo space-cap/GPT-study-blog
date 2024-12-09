@@ -15,3 +15,22 @@ python -m pip install --upgrade setuptools
 과금 확인?
 https://platform.openai.com/usage
 
+TA's 힌트
+환경 세팅은 강의 내용 중 #2 INTRODUCTION 부분을 천천히 따라하면 쉽게 구축할 수 있습니다.
+환경 세팅을 마친 후, 아래의 과정으로 진행하면 챌린지를 해결할 수 있습니다.
+특정 프로그래밍 언어에 대한 시를 생성하도록 하는 프롬프트 템플릿을 만들고 해당하는 체인을 구축합니다.
+특정 시에 대한 설명을 생성하도록 하는 프롬프트 템플릿을 만들고 해당하는 체인을 구축합니다.
+프롬프트 템플릿은 강의에서 다루었던 ChatPromptTemplate 를 활용하세요.
+LCEL의 기본 사용법이 헷갈리는 경우 공식문서의 LCEL Get started 를 참고하세요.
+두 개의 체인을 LCEL을 사용하여 연결 합니다.
+여러 개의 체인을 다루는 방법에 대해서는 Multiple Chains 를 참고하세요.
+답변이 생성되는 과정을 실시간으로 확인하기 위해 ChatOpenAI 모델에 streaming 옵션과 StreamingStdOutCallbackHandler을 활용하세요.
+
+
+
+https://python.langchain.com/v0.1/docs/modules/model_io/prompts/quick_start/#chatprompttemplate
+https://python.langchain.com/v0.1/docs/expression_language/get_started/
+https://python.langchain.com/v0.1/docs/expression_language/cookbook/multiple_chains/
+
+
+
