@@ -5,6 +5,12 @@ Interface with language models
 
 
 
+Capital: Bangkok, Language: Thai, Food: Pad Thai, Currency: Baht
 
 
+I know this:
+Capital: Bangkok
+Language: Thai
+Food: Pad Thai and Tom Yum Soup
+Currency: Thai Baht
 
