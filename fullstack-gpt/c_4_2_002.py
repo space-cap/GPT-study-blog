@@ -16,8 +16,8 @@ chat = ChatGoogleGenerativeAI(model="gemini-1.5-flash",
                               ])
 
 examples = [
-    {"country": "France", "answer": "Capital: Paris\nLanguage: French\nFood: Wine and Cheese\nCurrency: Euro"},
-    {"country": "Italy", "answer": "Capital: Rome\nLanguage: Italian\nFood: Pizza and Pasta\nCurrency: Euro"}
+    {"country": "France", "answer": "I know this:\nCapital: Paris\nLanguage: French\nFood: Wine and Cheese\nCurrency: Euro"},
+    {"country": "Italy", "answer": "I know this:\nCapital: Rome\nLanguage: Italian\nFood: Pizza and Pasta\nCurrency: Euro"}
 ]
 
 example_prompt = ChatPromptTemplate.from_messages([
