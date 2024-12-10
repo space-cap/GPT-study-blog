@@ -16,61 +16,26 @@ chat = ChatGoogleGenerativeAI(model="gemini-1.5-flash",
                               ])
 
 examples = [
-    {
-        "country": "France",
-        "answer": """
-        Here is what I know:
-        Capital: Paris
-        Language: French
-        Food: Wine and Cheese
-        Currency: Euro
-        """,
-    },
-    {
-        "country": "Italy",
-        "answer": """
-        I know this:
-        Capital: Rome
-        Language: Italian
-        Food: Pizza and Pasta
-        Currency: Euro
-        """,
-    },
-    {
-        "country": "Greece",
-        "answer": """
-        I know this:
-        Capital: Athens
-        Language: Greek
-        Food: Souvlaki and Feta Cheese
-        Currency: Euro
-        """,
-    },
+    {"country": "France", "answer": "Capital: Paris\nLanguage: French\nFood: Wine and Cheese\nCurrency: Euro"},
+    {"country": "Italy", "answer": "Capital: Rome\nLanguage: Italian\nFood: Pizza and Pasta\nCurrency: Euro"}
 ]
 
-example_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("human", "What do you know about {country}?"),
-        ("ai", "{answer}"),
-    ]
-)
+example_prompt = ChatPromptTemplate.from_messages([
+    ("human", "What do you know about {country}?"),
+    ("ai", "{answer}")
+])
 
-prompt = FewShotChatMessagePromptTemplate(
-    example_prompt=example_prompt,
+few_shot_prompt = FewShotChatMessagePromptTemplate(
     examples=examples,
+    example_prompt=example_prompt
 )
 
-# print(prompt)
-
-final_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", "You are a geography expert, you give short answers."),
-        prompt,
-        ("human", "What do you know about {country}?"),
-    ]
-)
+final_prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a geography expert, you give short answers."),
+    few_shot_prompt,
+    ("human", "What do you know about {country}?")
+])
 
 chain = final_prompt | chat
-
 result = chain.invoke({"country": "Thailand"})
 print(result.content)
