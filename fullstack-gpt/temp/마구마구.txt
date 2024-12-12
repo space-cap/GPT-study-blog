@@ -38,10 +38,19 @@ pip install -qU langchain-openai
 pip install langchain-community
 pip install --upgrade --quiet  langchain-google-genai
 pip install networkx
+pip install --upgrade ipywidgets
+# conda install -c conda-forge ipywidgets
+
+
+
 
 
 구글 키 가지고 오기
 https://aistudio.google.com/apikey
+
+
+Import "dotenv" could not be resolved Pylance(reportMissingImports)
+
 
 
 
