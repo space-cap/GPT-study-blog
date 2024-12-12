@@ -31,6 +31,7 @@ torch
 torchvision
 tornado
 
+pip install tokenizers
 
 
 windsurf 도 한번 다뤄주세요. 저는 cursor에서 갈아탔습니다.
