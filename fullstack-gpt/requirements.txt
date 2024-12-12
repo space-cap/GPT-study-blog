@@ -116,7 +116,7 @@ numexpr==2.8.5
 numpy
 olefile==0.46
 omegaconf==2.3.0
-onnx==1.14.1
+onnx
 onnxruntime
 openai==0.28.0
 opencv-python==4.8.0.76
@@ -185,7 +185,7 @@ safetensors==0.3.3
 scikit-learn==1.3.1
 scipy==1.11.3
 sentence-transformers==2.2.2
-sentencepiece==0.1.99
+sentencepiece
 six==1.16.0
 smart-open==6.4.0
 smmap==5.0.0
@@ -210,10 +210,10 @@ tiktoken
 timm==0.9.7
 tokenizers
 toml==0.10.2
-toolz==0.12.0
-torch==2.0.1
-torchvision==0.15.2
-tornado==6.3.3
+toolz
+torch
+torchvision
+tornado
 tqdm==4.66.1
 traitlets==5.10.0
 transformers==4.34.0

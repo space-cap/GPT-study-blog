@@ -15,6 +15,24 @@ Food: Pad Thai and Tom Yum Soup
 Currency: Thai Baht
 
 
+
+git init .
+
+python -m venv ./env
+
+pip install -r requirements.txt
+
+3.12.* 에서 설치를 하려면
+변경 해 줘야 됨. 최신 버전으로 
+pip install onnx
+pip install sentencepiece
+pip install toolz
+torch
+torchvision
+tornado
+
+
+
 windsurf 도 한번 다뤄주세요. 저는 cursor에서 갈아탔습니다.
 https://nomadcoders.co/fullstack-gpt/checkout
 
