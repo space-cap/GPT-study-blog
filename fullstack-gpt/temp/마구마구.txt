@@ -14,3 +14,54 @@ Language: Thai
 Food: Pad Thai and Tom Yum Soup
 Currency: Thai Baht
 
+
+windsurf 도 한번 다뤄주세요. 저는 cursor에서 갈아탔습니다.
+https://nomadcoders.co/fullstack-gpt/checkout
+
+requirements.txt
+
+python -m pip install --upgrade setuptools wheel
+
+C:\Python\Python311>python.exe -V
+Python 3.11.3
+tokenizers==0.13.3
+pip install tokenizers --pre
+pip install tokenizers
+pip install tiktoken
+pip install langchain openai
+pip install python-dotenv
+nomadcoder
+pip install -qU langchain-openai
+pip install langchain-community
+pip install --upgrade --quiet  langchain-core langchain-community langchain-openai
+pip install -qU langchain-google-vertexai
+
+RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
+
+AIzaSyDHAljynfAMqxBGSu0xrUV3qfDQpQJ9x4U
+
+pip install google-generativeai
+pip install --upgrade --quiet  langchain-google-genai
+
+How many planets are there?
+
+pip install -U langchain-community
+pip install -U langchain-openai
+pip install -qU langchain-google-vertexai
+
+pip install --upgrade ipywidgets
+
+https://python.langchain.com/docs/get_started/quickstart#llm--chat-model
+https://python.langchain.com/docs/concepts/chat_models/#overview
+https://python.langchain.com/docs/integrations/chat/
+
+https://python.langchain.com/docs/integrations/llms/google_ai/
+
+https://aistudio.google.com/apikey
+
+
+과금 확인?
+https://platform.openai.com/usage
+
+challenge_day_1
