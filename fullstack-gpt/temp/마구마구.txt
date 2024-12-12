@@ -43,6 +43,8 @@ pip install --upgrade ipywidgets
 pip install --upgrade jupyter jupyter_core jupyter_client notebook
 pip install openai
 pip install langchain-openai python-dotenv
+pip install -qU langchain-openai
+
 
 
 
@@ -62,6 +64,15 @@ langchain 에서 Azure OpenAI 를 사용을 하고 싶다.
 
 AZURE_OPENAI_API_KEY=your_api_key_here
 AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
+
+POST https://YOUR_RESOURCE_NAME.openai.azure.com/openai/deployments/YOUR_DEPLOYMENT_NAME/chat/completions?api-version=2024-06-01
+
+Azure OpenAI deployment types
+
+
+
+
+
 
 
 
