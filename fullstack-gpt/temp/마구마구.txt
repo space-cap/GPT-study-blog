@@ -32,6 +32,12 @@ torchvision
 tornado
 
 pip install tokenizers
+pip install langchain openai
+pip install python-dotenv
+pip install -qU langchain-openai
+pip install langchain-community
+pip install --upgrade --quiet  langchain-google-genai
+
 
 
 windsurf 도 한번 다뤄주세요. 저는 cursor에서 갈아탔습니다.
