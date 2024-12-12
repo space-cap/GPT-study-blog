@@ -40,6 +40,13 @@ pip install --upgrade --quiet  langchain-google-genai
 pip install networkx
 pip install --upgrade ipywidgets
 # conda install -c conda-forge ipywidgets
+pip install --upgrade jupyter jupyter_core jupyter_client notebook
+pip install openai
+pip install langchain-openai python-dotenv
+
+
+
+
 
 
 
@@ -47,6 +54,17 @@ pip install --upgrade ipywidgets
 
 구글 키 가지고 오기
 https://aistudio.google.com/apikey
+
+
+
+langchain 에서 Azure OpenAI 를 사용을 하고 싶다.
+어떻게 해야되
+
+AZURE_OPENAI_API_KEY=your_api_key_here
+AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
+
+
+
 
 
 Import "dotenv" could not be resolved Pylance(reportMissingImports)
