@@ -52,6 +52,7 @@ pip install azure-identity
 pip install --quiet -U langgraph langchain_anthropic
 
 pip install pypdf
+pip install unstructured
 
 
 
