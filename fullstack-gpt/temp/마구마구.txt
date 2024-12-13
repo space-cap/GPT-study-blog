@@ -53,6 +53,8 @@ pip install --quiet -U langgraph langchain_anthropic
 
 pip install pypdf
 pip install unstructured
+pip install python-magic-bin
+안 된다면 pip install pylibmagic
 
 
 
