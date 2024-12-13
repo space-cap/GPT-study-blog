@@ -56,6 +56,7 @@ pip install unstructured
 pip install python-magic-bin
 안 된다면 pip install pylibmagic
 pip install "unstructured[pdf]"
+설치 확인 pip show unstructured
 
 
 
