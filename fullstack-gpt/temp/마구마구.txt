@@ -57,6 +57,30 @@ pip install python-magic-bin
 안 된다면 pip install pylibmagic
 pip install "unstructured[pdf]"
 설치 확인 pip show unstructured
+pip install --upgrade numpy
+pip install "numpy<2"
+# pip install --force-reinstall unstructured unstructured-inference
+
+pip install unstructured unstructured-inference
+pip install iso639-lang
+pip install --upgrade unstructured
+pip install --upgrade langchain
+
+pip install python-magic-bin
+
+pip install langchain-unstructured
+pip install "unstructured[pdf]"
+
+pip install python-magic-bin
+pip install --upgrade langchain langchain-unstructured unstructured[all-docs]
+pip install python-magic-bin
+pip install wheel setuptools
+python -m pip install --upgrade setuptools wheel
+pip install -upgrade python-magic
+
+
+
+
 
 
 
