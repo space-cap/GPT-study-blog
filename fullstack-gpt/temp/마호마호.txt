@@ -54,6 +54,7 @@ https://python.langchain.com/v0.1/docs/modules/chains/
 https://python.langchain.com/v0.1/docs/use_cases/summarization/
 
 pip install faiss-gpu
+pip install faiss-cpu
 
 system
 Given the following extracted parts of a long document and a question, create a final answer. 
@@ -63,4 +64,14 @@ from langchain.vectorstores import FAISS
 vectorstore = FAISS.from_documents(docs, cached_embeddings)
 는 NVIDIA gpu 에서만 사용을 하는데
 amd gpu 에서도 사용하려면 어떻게 해야되.
+
+python -c "import faiss; print(faiss.__version__)"
+
+
+pip install faiss-cpu
+
+ImportError: Could not import faiss python package. 
+Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
+
+
 
