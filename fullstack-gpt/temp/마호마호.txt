@@ -14,3 +14,10 @@ pip install langchain-unstructured
 
 https://platform.openai.com/tokenizer
 
+some stuffs mentioned in video
+
+https://turbomaze.github.io/word2vecjson/
+
+https://www.youtube.com/watch?v=2eWuYf-aZE4
+
+
