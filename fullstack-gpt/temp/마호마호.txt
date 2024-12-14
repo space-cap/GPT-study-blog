@@ -35,4 +35,8 @@ pip install --upgrade "transformers<4.47.0"
 pip install tokenizers==0.20.3
 pip install --upgrade "tokenizers>=0.21,<0.22"
 
+C:\workdir\github-space-cap\GPT-study-blog\fullstack-gpt\env\Scripts
+
+
+
 
