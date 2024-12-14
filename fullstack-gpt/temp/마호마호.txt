@@ -73,5 +73,9 @@ pip install faiss-cpu
 ImportError: Could not import faiss python package. 
 Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
 
-
+pip install faiss-cpu
+vectorstore = FAISS.from_documents(docs, cached_embeddings)
+retriver = vectorstore.as_retriever()
+이렇게 코딩을 했는데 아래와 같이 에러가 발생했어. 원인이 뭐야.
+Failed to use model_dump to serialize <class 'langchain_core.runnables.base.RunnableSequence'> to JSON: PydanticSerializationError(Unable to serialize unknown type: <class 'langchain_community.vectorstores.faiss.FAISS'>)
 
