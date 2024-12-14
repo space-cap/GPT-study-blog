@@ -55,3 +55,7 @@ https://python.langchain.com/v0.1/docs/use_cases/summarization/
 
 pip install faiss-gpu
 
+system
+Given the following extracted parts of a long document and a question, create a final answer. 
+If you don't know the answer, just say that you don't know. Don't try to make up an answer.
+
