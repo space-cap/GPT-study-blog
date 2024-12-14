@@ -1,0 +1,13 @@
+
+
+
+Data connection
+
+pip install langchain-community unstructured[all-docs]
+pip install unstructured
+
+# # Install package
+pip install --upgrade --quiet  "unstructured[all-docs]"
+--quiet 조용히 처리, 진행 로그가 보이지 않는다.
+
+pip install langchain-unstructured
