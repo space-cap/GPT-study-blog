@@ -79,3 +79,8 @@ retriver = vectorstore.as_retriever()
 이렇게 코딩을 했는데 아래와 같이 에러가 발생했어. 원인이 뭐야.
 Failed to use model_dump to serialize <class 'langchain_core.runnables.base.RunnableSequence'> to JSON: PydanticSerializationError(Unable to serialize unknown type: <class 'langchain_community.vectorstores.faiss.FAISS'>)
 
+https://www.telelib.com/authors/O/OrwellGeorge/prose/NineteenEightyFour/part3sec3.html
+~
+https://www.telelib.com/authors/O/OrwellGeorge/prose/NineteenEightyFour/part3sec6.html
+
+
