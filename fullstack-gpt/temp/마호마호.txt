@@ -38,5 +38,18 @@ pip install --upgrade "tokenizers>=0.21,<0.22"
 C:\workdir\github-space-cap\GPT-study-blog\fullstack-gpt\env\Scripts
 
 
+pip install -U langchain langchain-openai
 
+https://js.langchain.com/v0.1/docs/modules/chains/document/stuff/
+Stuff documents
+Refine documents chain
+Map reduce documents chain
+Map re-rank documents chin
+
+
+https://python.langchain.com/docs/modules/chains/documents/refine
+
+https://python.langchain.com/v0.1/docs/modules/chains/
+
+https://python.langchain.com/v0.1/docs/use_cases/summarization/
 
