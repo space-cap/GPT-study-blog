@@ -59,3 +59,8 @@ system
 Given the following extracted parts of a long document and a question, create a final answer. 
 If you don't know the answer, just say that you don't know. Don't try to make up an answer.
 
+from langchain.vectorstores import FAISS
+vectorstore = FAISS.from_documents(docs, cached_embeddings)
+는 NVIDIA gpu 에서만 사용을 하는데
+amd gpu 에서도 사용하려면 어떻게 해야되.
+
