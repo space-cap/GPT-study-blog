@@ -89,3 +89,27 @@ https://nomadcoders.co/c/gpt-challenge/lobby
 
 https://nomadcoders.co/community/thread/10451
 
+https://docs.streamlit.io/library/get-started/create-an-app
+
+.env\Scripts\activate
+
+source .env/Scripts/activate
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
