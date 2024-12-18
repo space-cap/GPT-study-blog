@@ -30,7 +30,8 @@ def embed_file(file):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
     vectorstore = FAISS.from_documents(docs, cached_embeddings)
-    return vectorstore
+    retriever = vectorstore.as_retriever()
+    return retriever
 
 
 st.title("DocumentGPT")
