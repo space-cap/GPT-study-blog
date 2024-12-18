@@ -80,6 +80,11 @@ pip install --upgrade python-magic
 pip install --upgrade python-magic-bin
 
 
+https://share.streamlit.io/deploy
+
+
+
+
 
 
 
