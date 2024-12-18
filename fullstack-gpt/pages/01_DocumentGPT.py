@@ -2,8 +2,7 @@ import time
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.document_loaders import TextLoader
-from langchain_community.embeddings import OpenAIEmbeddings
-from langchain_core.embeddings import CacheBackedEmbeddings
+from langchain.embeddings import CacheBackedEmbeddings, OpenAIEmbeddings
 from langchain.storage import LocalFileStore
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.vectorstores import FAISS
