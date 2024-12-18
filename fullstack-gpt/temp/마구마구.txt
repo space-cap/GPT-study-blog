@@ -169,3 +169,15 @@ https://aistudio.google.com/apikey
 https://platform.openai.com/usage
 
 challenge_day_1
+
+
+C:\Python\Python311\python.exe 
+
+
+streamlit-project
+
+
+https://jay-1234.streamlit.app/
+
+streamlit 출시한 다음에 다시 app launch 를 하려면 어떻게 해야 되나요?
+requirements.txt 파일을 변경했습니다.
