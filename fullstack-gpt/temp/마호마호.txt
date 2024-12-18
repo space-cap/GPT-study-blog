@@ -1,0 +1,138 @@
+
+
+
+Data connection
+
+pip install langchain-community unstructured[all-docs]
+pip install unstructured
+
+# # Install package
+pip install --upgrade --quiet  "unstructured[all-docs]"
+--quiet 조용히 처리, 진행 로그가 보이지 않는다.
+
+pip install langchain-unstructured
+
+https://platform.openai.com/tokenizer
+
+some stuffs mentioned in video
+
+https://turbomaze.github.io/word2vecjson/
+
+https://www.youtube.com/watch?v=2eWuYf-aZE4
+
+
+pip install chromadb
+
+pip install --upgrade transformers
+pip install --upgrade "tokenizers>=0.21,<0.22"
+pip install transformers==4.47.0 tokenizers==0.21.0
+
+pip install tokenizers==0.20.3
+
+pip install --upgrade "tokenizers>=0.21,<0.22"
+pip install --upgrade "transformers<4.47.0"
+
+pip install tokenizers==0.20.3
+pip install --upgrade "tokenizers>=0.21,<0.22"
+
+C:\workdir\github-space-cap\GPT-study-blog\fullstack-gpt\env\Scripts
+
+
+pip install -U langchain langchain-openai
+
+https://js.langchain.com/v0.1/docs/modules/chains/document/stuff/
+Stuff documents
+Refine documents chain
+Map reduce documents chain
+Map re-rank documents chin
+
+
+https://python.langchain.com/docs/modules/chains/documents/refine
+
+https://python.langchain.com/v0.1/docs/modules/chains/
+
+https://python.langchain.com/v0.1/docs/use_cases/summarization/
+
+pip install faiss-gpu
+pip install faiss-cpu
+
+system
+Given the following extracted parts of a long document and a question, create a final answer. 
+If you don't know the answer, just say that you don't know. Don't try to make up an answer.
+
+from langchain.vectorstores import FAISS
+vectorstore = FAISS.from_documents(docs, cached_embeddings)
+는 NVIDIA gpu 에서만 사용을 하는데
+amd gpu 에서도 사용하려면 어떻게 해야되.
+
+python -c "import faiss; print(faiss.__version__)"
+
+
+pip install faiss-cpu
+
+ImportError: Could not import faiss python package. 
+Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
+
+pip install faiss-cpu
+vectorstore = FAISS.from_documents(docs, cached_embeddings)
+retriver = vectorstore.as_retriever()
+이렇게 코딩을 했는데 아래와 같이 에러가 발생했어. 원인이 뭐야.
+Failed to use model_dump to serialize <class 'langchain_core.runnables.base.RunnableSequence'> to JSON: PydanticSerializationError(Unable to serialize unknown type: <class 'langchain_community.vectorstores.faiss.FAISS'>)
+
+https://www.telelib.com/authors/O/OrwellGeorge/prose/NineteenEightyFour/part3sec3.html
+~
+https://www.telelib.com/authors/O/OrwellGeorge/prose/NineteenEightyFour/part3sec6.html
+
+http://www.george-orwell.org/1984/0.html
+
+https://nomadcoders.co/c/gpt-challenge/lobby
+
+https://nomadcoders.co/community/thread/10451
+
+https://docs.streamlit.io/library/get-started/create-an-app
+
+.env\Scripts\activate
+
+source env/Scripts/activate
+.env\Scripts\activate.bat
+.env\Scripts\Activate.ps1
+source .env\Scripts\activate.bat
+source .env/Scripts/activate.bat
+
+source env/Scripts/deactivate
+deactivate
+
+
+Why are Prompt Templates useful?
+
+1. They help us give embeddings with variables to the LLM
+2. They help us reuse prompts and format them with variables
+3. They help us compress prompts to save tokens
+4. They help us format the responses of the LLM
+
+
+What is the difference between a PromptTemplate and a ChatPromptTemplate?
+
+1. PromptTemplate is to format chat messages and ChatPromptTemplate is to format a string
+2. ChatPromptTemplate is to format chat messages and PromptTemplate is to format a string
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
