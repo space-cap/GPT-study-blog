@@ -21,13 +21,17 @@ class ChatCallbackHandler(BaseCallbackHandler):
 
     def on_llm_start(self, *args, **kwargs):
         self.message_box = st.empty()
+        print("LLM 생성 시작...")
 
     def on_llm_end(self, *args, **kwargs):
         save_message(self.message, "ai")
+        print("\nLLM 생성 완료!")
 
     def on_llm_new_token(self, token, *args, **kwargs):
+        print(f"새로운 토큰: {token}", end="", flush=True)
         self.message += token
         self.message_box.markdown(self.message)
+        
 
 handler = ChatCallbackHandler()
 
@@ -132,6 +136,7 @@ if file:
         )
         with st.chat_message("ai"):
             response = chain.invoke(message, config={"callbacks": [handler]})
+            print(response.content)
             
 else:
     st.session_state["messages"] = []
