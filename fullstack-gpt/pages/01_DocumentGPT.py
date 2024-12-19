@@ -29,10 +29,10 @@ class ChatCallbackHandler(BaseCallbackHandler):
         save_message(self.message, "ai")
         print("\nLLM 생성 완료!")
 
-    def on_llm_new_token(self, token, *args, **kwargs):
+    def on_llm_new_token(self, token: str, **kwargs) -> None:
         print(f"새로운 토큰: {token}", end="", flush=True)
         self.message += token
-        self.message_box.markdown(self.message)
+        self.message_box.markdown(self.message + "▌")
         
 answer_container = st.empty()
 handler = ChatCallbackHandler(answer_container)
@@ -139,6 +139,10 @@ if file:
         with st.chat_message("ai"):
             response = chain.invoke(message, config={"callbacks": [handler]})
             print(response.content)
+            
+        # 최종 결과 표시
+        st.subheader("최종 답변:")
+        st.write(response.content)
             
 else:
     st.session_state["messages"] = []
