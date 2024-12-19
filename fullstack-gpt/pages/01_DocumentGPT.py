@@ -56,6 +56,11 @@ def paint_history():
             save=False,
         )
 
+
+def format_docs(docs):
+    return "\n\n".join(document.page_content for document in docs)
+
+
 prompt = ChatPromptTemplate.from_messages(
     [
         (
