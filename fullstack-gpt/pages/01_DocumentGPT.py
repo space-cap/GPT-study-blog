@@ -18,8 +18,8 @@ st.set_page_config(
 
 class ChatCallbackHandler(BaseCallbackHandler):
     
-    def __init__(self, container):
-        self.message_box = container
+    def __init__(self):
+        self.message_box = st.empty()
         self.message = ""
     
     def on_llm_start(self, *args, **kwargs):
@@ -34,8 +34,8 @@ class ChatCallbackHandler(BaseCallbackHandler):
         self.message += token
         self.message_box.markdown(self.message + "▌")
         
-answer_container = st.empty()
-handler = ChatCallbackHandler(answer_container)
+
+handler = ChatCallbackHandler()
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash", 
