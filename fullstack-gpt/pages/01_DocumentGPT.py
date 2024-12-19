@@ -13,7 +13,7 @@ st.set_page_config(
     page_icon="📃",
 )
 
-@st.cache_data(show_spinner="Embedding file...")
+@st.cache_resource(show_spinner="Embedding file...")
 def embed_file(file):
     file_content = file.read()
     file_path = f"./.cache/files/{file.name}"
@@ -25,7 +25,7 @@ def embed_file(file):
         chunk_size=600,
         chunk_overlap=100,
     )
-    loader = TextLoader("./files/chapter_one.txt")
+    loader = TextLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
