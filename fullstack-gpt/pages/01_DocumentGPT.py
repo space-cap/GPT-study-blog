@@ -137,7 +137,13 @@ if file:
             | llm
         )
         with st.chat_message("ai"):
-            st.write_stream(chunk.content for chunk in chain.stream(message))
+            response = st.empty()
+            full_response = ""
+            for chunk in chain.stream(message):
+                full_response += chunk.content
+                response.markdown(full_response)
+            save_message(full_response, "ai")
+            # st.write_stream(chunk.content for chunk in chain.stream(message))
             #response = chain.invoke(message, config={"callbacks": [handler]})
             #print(response.content)
             
