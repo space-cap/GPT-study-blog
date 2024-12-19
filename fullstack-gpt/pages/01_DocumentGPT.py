@@ -137,12 +137,14 @@ if file:
             | llm
         )
         with st.chat_message("ai"):
-            response = chain.invoke(message, config={"callbacks": [handler]})
-            print(response.content)
+            for chunk in chain.stream(message, config={"callbacks": [handler]}):
+                pass
+            #response = chain.invoke(message, config={"callbacks": [handler]})
+            #print(response.content)
             
         # 최종 결과 표시
-        st.subheader("최종 답변:")
-        st.write(response.content)
+        # st.subheader("최종 답변:")
+        # st.write(response.content)
             
 else:
     st.session_state["messages"] = []
