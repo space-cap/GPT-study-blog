@@ -25,7 +25,7 @@ def embed_file(file):
         chunk_size=600,
         chunk_overlap=100,
     )
-    loader = TextLoader(file_path)
+    loader = TextLoader("./files/chapter_one.txt")
     docs = loader.load_and_split(text_splitter=splitter)
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
