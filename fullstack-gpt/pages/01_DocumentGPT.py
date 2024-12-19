@@ -5,6 +5,7 @@ from langchain.document_loaders import TextLoader
 from langchain.embeddings import CacheBackedEmbeddings, OpenAIEmbeddings
 from langchain.storage import LocalFileStore
 from langchain.text_splitter import CharacterTextSplitter
+from langchain.prompts import ChatPromptTemplate
 from langchain_community.vectorstores import FAISS
 import streamlit as st
 
@@ -12,6 +13,11 @@ st.set_page_config(
     page_title="DocumentGPT",
     page_icon="📃",
 )
+
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash", 
+    temperature=0.1,
+    )
 
 @st.cache_resource(show_spinner="Embedding file...")
 def embed_file(file):
@@ -49,6 +55,20 @@ def paint_history():
             save=False,
         )
 
+prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """
+            Answer the question using ONLY the following context. If you don't know the answer just say you don't know. DON'T make anything up.
+            
+            Context: {context}
+            """,
+        ),
+        ("human", "{question}"),
+    ]
+)
+
 
 st.title("DocumentGPT")
 
@@ -75,6 +95,16 @@ if file:
     message = st.chat_input("Ask anything about your file...")
     if message:
         send_message(message, "human")
+        chain = (
+            {
+                "context": retriever | RunnableLambda(format_docs),
+                "question": RunnablePassthrough(),
+            }
+            | prompt
+            | llm
+        )
+        response = chain.invoke(message)
+        send_message(response.content, "ai")
 else:
     st.session_state["messages"] = []
 
