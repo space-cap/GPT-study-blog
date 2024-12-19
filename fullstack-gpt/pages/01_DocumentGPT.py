@@ -137,8 +137,8 @@ if file:
             | llm
         )
         with st.chat_message("ai"):
-            for chunk in chain.stream(message, config={"callbacks": [handler]}):
-                pass
+            for chunk in chain.stream(message):
+                st.markdown(chunk)
             #response = chain.invoke(message, config={"callbacks": [handler]})
             #print(response.content)
             
