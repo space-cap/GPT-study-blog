@@ -130,6 +130,24 @@ python -m venv .venv
 
 pip install -r requirements.txt
 
+Describe Winston's appartment
+Where does winston work?
+How many ministries are there?
+
+
+이것은 놀라운 질문입니다. 여기에서 LCEL이 없는 코드와 LCEL이 있는 코드의 모든 예를 볼 수 있습니다.
+
+https://python.langchain.com/v0.1/docs/expression_language/why/
+
+예를 들어, LCEL에서는 스트리밍이 더 좋습니다: https://python.langchain.com/v0.1/docs/expression_language/why/ #stream
+
+런타임 구성 가능성: https://python.langchain.com/v0.1/docs/expression_language/why/ #runtime-configur 가능성
+
+
+openAI 대신에 ollama 로 실습하고 있습니다.
+
+
+
 
 
 
