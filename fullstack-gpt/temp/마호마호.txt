@@ -165,6 +165,7 @@ pip install -U transformers langchain-huggingface pydantic tokenizers langchain
 
 pip install langchain-huggingface
 
+C:\Users\username\.cache\huggingface\hub
 
 
 
