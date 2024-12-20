@@ -151,6 +151,9 @@ streamlit run c_7_3_001.py
 
 
 
+This app is public and searchable
+
+https://jay-1234.streamlit.app/
 
 
 
