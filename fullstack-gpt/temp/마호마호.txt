@@ -160,9 +160,10 @@ https://jay-1234.streamlit.app/
 mistralai/Mistral-7B-v0.1
 
 
+pip install -U transformers langchain-huggingface pydantic tokenizers langchain
 
 
-
+pip install langchain-huggingface
 
 
 
