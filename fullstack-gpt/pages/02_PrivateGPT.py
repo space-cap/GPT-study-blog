@@ -32,11 +32,6 @@ class ChatCallbackHandler(BaseCallbackHandler):
 
 llm = ChatOllama(
     model="mistral:latest",
-    temperature=0.1,
-    streaming=True,
-    callbacks=[
-        ChatCallbackHandler(),
-    ],
 )
 
 
