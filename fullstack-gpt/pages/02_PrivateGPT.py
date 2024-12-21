@@ -1,11 +1,10 @@
 from langchain.prompts import ChatPromptTemplate
 from langchain.document_loaders import TextLoader
-from langchain.embeddings import CacheBackedEmbeddings
-from langchain_community import OllamaEmbeddings
+from langchain.embeddings import CacheBackedEmbeddings, OllamaEmbeddings
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain.storage import LocalFileStore
 from langchain.text_splitter import CharacterTextSplitter
-from langchain_community import FAISS
+from langchain.vectorstores.faiss import FAISS
 from langchain.chat_models import ChatOllama
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
