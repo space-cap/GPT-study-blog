@@ -149,7 +149,7 @@ openAI 대신에 ollama 로 실습하고 있습니다.
 
 streamlit run c_7_3_001.py
 
-
+langchain_community 
 
 This app is public and searchable
 
@@ -173,6 +173,7 @@ pip install -U langchain-ollama
 
 
 
+pip install -U langchain langchain-community faiss-cpu streamlit
 
 
 
