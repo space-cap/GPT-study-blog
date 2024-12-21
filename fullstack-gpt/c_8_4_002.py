@@ -1,6 +1,7 @@
 from langchain_community.chat_models import ChatOllama
 from langchain_core.messages import HumanMessage, SystemMessage
 
+
 # ChatOllama 모델 초기화
 chat_model = ChatOllama(model="mistral:latest")
 
