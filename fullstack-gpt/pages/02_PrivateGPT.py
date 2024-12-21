@@ -11,6 +11,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
 from langchain.chat_models import ChatOllama
+import faiss
 
 
 st.set_page_config(
@@ -60,9 +61,16 @@ def embed_file(file):
     loader = TextLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
     embeddings = OllamaEmbeddings(model="mistral:latest")
+
+    vector = embeddings.embed_query("Test query")
+    st.markdown(len(vector))
+    index_dim = faiss.IndexFlatL2(len(vector))
+    st.markdown(index_dim.d)
+
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
-    vectorstore = FAISS.from_documents(docs, cached_embeddings)
+    vectorstore = FAISS.from_documents(docs, cached_embeddings, index_dim=index_dim)
     retriever = vectorstore.as_retriever()
+
     return retriever
 
 
@@ -124,7 +132,11 @@ with st.sidebar:
     )
 
 if file:
-    retriever = embed_file(file)
+    try:
+        retriever = embed_file(file)
+    except Exception as e:
+        st.error(f"Error embedding file: {str(e)}")
+
     send_message("I'm ready! Ask away!", "ai", save=False)
     paint_history()
     message = st.chat_input("Ask anything about your file...")
