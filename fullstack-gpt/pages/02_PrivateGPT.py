@@ -67,20 +67,12 @@ def embed_file(file):
     #st.markdown(len(vector))
     # 차원 수 설정
     embedding_dim = len(embeddings.embed_query("Sample text"))
-    
 
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
-    # vectorstore = FAISS.from_documents(docs, cached_embeddings, index=index_dim)
+    vectorstore = FAISS.from_documents(docs, cached_embeddings)
     
     
-    # 수정된 부분
-    vectorstore = FAISS(
-        embedding_function=cached_embeddings,
-        index=faiss.IndexFlatL2(embedding_dim),
-    )
-
-    # 문서 추가
-    vectorstore.add_documents(docs)
+    
         
     
     retriever = vectorstore.as_retriever()
