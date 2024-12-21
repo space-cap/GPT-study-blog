@@ -1,20 +1,13 @@
 from langchain.prompts import ChatPromptTemplate
-from langchain.document_loaders import TextLoader
+from langchain.document_loaders import UnstructuredFileLoader
 from langchain.embeddings import CacheBackedEmbeddings, OllamaEmbeddings
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain.storage import LocalFileStore
 from langchain.text_splitter import CharacterTextSplitter
-from langchain_community.vectorstores import FAISS
-from langchain.vectorstores import Chroma
-from langchain_ollama import ChatOllama
+from langchain.vectorstores.faiss import FAISS
+from langchain.chat_models import ChatOllama
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
-import logging
-import chromadb
-
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 st.set_page_config(
     page_title="PrivateGPT",
@@ -38,10 +31,15 @@ class ChatCallbackHandler(BaseCallbackHandler):
 
 llm = ChatOllama(
     model="mistral:latest",
+    temperature=0.1,
+    streaming=True,
+    callbacks=[
+        ChatCallbackHandler(),
+    ],
 )
 
 
-@st.cache_resource(show_spinner="Embedding file...")
+@st.cache_data(show_spinner="Embedding file...")
 def embed_file(file):
     file_content = file.read()
     file_path = f"./.cache/private_files/{file.name}"
@@ -53,31 +51,11 @@ def embed_file(file):
         chunk_size=600,
         chunk_overlap=100,
     )
-    loader = TextLoader(file_path)
+    loader = UnstructuredFileLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
     embeddings = OllamaEmbeddings(model="mistral:latest")
-
-
-
-    persist_directory = "./chroma_db"
-    
-    client = chromadb.PersistentClient(path=persist_directory)
-    collection_name = f"collection_{file.name}"
-    collection = client.get_or_create_collection(
-        name=collection_name,
-        embedding_function=embeddings,
-        metadata={"hnsw:space": "cosine"}
-    )
-    
-    vectorstore = Chroma(
-        client=client,
-        collection_name=collection_name,
-        embedding_function=embeddings,
-        persist_directory=persist_directory
-    )
-    
-    vectorstore.add_documents(docs)
-    
+    cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
+    vectorstore = FAISS.from_documents(docs, cached_embeddings)
     retriever = vectorstore.as_retriever()
     return retriever
 
@@ -154,3 +132,5 @@ if file:
 
 else:
     st.session_state["messages"] = []
+
+    
