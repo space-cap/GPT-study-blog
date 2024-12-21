@@ -5,6 +5,7 @@ from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain.storage import LocalFileStore
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.vectorstores import FAISS
+from langchain.vectorstores import Chroma
 from langchain_ollama import ChatOllama
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
@@ -51,7 +52,8 @@ def embed_file(file):
     docs = loader.load_and_split(text_splitter=splitter)
     embeddings = OllamaEmbeddings(model="mistral:latest")
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
-    vectorstore = FAISS.from_documents(docs, cached_embeddings)
+    persist_directory = "./chroma_db"
+    vectorstore = Chroma.from_documents(docs, cached_embeddings, persist_directory=persist_directory)
     retriever = vectorstore.as_retriever()
     return retriever
 
