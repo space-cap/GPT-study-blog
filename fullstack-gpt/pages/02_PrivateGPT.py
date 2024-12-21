@@ -51,10 +51,10 @@ llm = ChatOllama(
 @st.cache_resource(show_spinner="Embedding file...")
 def embed_file(file):
     file_content = file.read()
-    file_path = f"./.cache/files/{file.name}"
+    file_path = f"./.cache/private_files/{file.name}"
     with open(file_path, "wb") as f:
         f.write(file_content)
-    cache_dir = LocalFileStore(f"./.cache/embeddings/{file.name}")
+    cache_dir = LocalFileStore(f"./.cache/private_embeddings/{file.name}")
     splitter = CharacterTextSplitter.from_tiktoken_encoder(
         separator="\n",
         chunk_size=600,
@@ -62,12 +62,17 @@ def embed_file(file):
     )
     loader = TextLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
-    
+    # st.markdown(len(docs))
+
     embeddings = OllamaEmbeddings(model="mistral:latest")
     vector = embeddings.embed_query("Test query")
     st.markdown(len(vector))
 
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
+    embedded_query = cached_embeddings.embed_query("This is a test query")
+    dimension = len(embedded_query)
+    st.markdown(f"임베딩 차원 수: {dimension}")
+
     vectorstore = FAISS.from_documents(docs, cached_embeddings)
     st.markdown(f"Embedding dimension: {vectorstore.index.d}")
     # st.markdown(f"Embedding dimension: {vectorstore._embedding_function.client.get_collection(vectorstore._collection.name).count()}")
