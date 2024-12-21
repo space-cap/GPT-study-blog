@@ -144,19 +144,7 @@ if file:
             | llm
         )
         with st.chat_message("ai"):
-            response = st.empty()
-            full_response = ""
-            for chunk in chain.stream(message):
-                full_response += chunk.content
-                response.markdown(full_response)
-            save_message(full_response, "ai")
-            # st.write_stream(chunk.content for chunk in chain.stream(message))
-            #response = chain.invoke(message, config={"callbacks": [handler]})
-            #print(response.content)
-            
-        # 최종 결과 표시
-        # st.subheader("최종 답변:")
-        # st.write(response.content)
+            chain.invoke(message)
             
 else:
     st.session_state["messages"] = []
