@@ -8,6 +8,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain_community.vectorstores import FAISS
+from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
 from langchain.chat_models import ChatOllama
@@ -62,13 +63,29 @@ def embed_file(file):
     docs = loader.load_and_split(text_splitter=splitter)
     embeddings = OllamaEmbeddings(model="mistral:latest")
 
-    vector = embeddings.embed_query("Test query")
-    st.markdown(len(vector))
-    index_dim = faiss.IndexFlatL2(len(vector))
+    #vector = embeddings.embed_query("Test query")
+    #st.markdown(len(vector))
+    # 차원 수 설정
+    dimension = 4096
+    index_dim = faiss.IndexFlatL2(dimension)
     st.markdown(index_dim.d)
 
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
-    vectorstore = FAISS.from_documents(docs, cached_embeddings, index=index_dim)
+    # vectorstore = FAISS.from_documents(docs, cached_embeddings, index=index_dim)
+    
+    
+    # 수정된 부분
+    vectorstore = FAISS(
+        embedding_function=cached_embeddings,
+        index=index_dim,
+        docstore=InMemoryDocstore(),
+        index_to_docstore_id={}
+    )
+
+    # 문서 추가
+    vectorstore.add_documents(docs)
+        
+    
     retriever = vectorstore.as_retriever()
 
     return retriever
@@ -132,11 +149,7 @@ with st.sidebar:
     )
 
 if file:
-    try:
-        retriever = embed_file(file)
-    except Exception as e:
-        st.error(f"Error embedding file: {str(e)}")
-
+    retriever = embed_file(file)
     send_message("I'm ready! Ask away!", "ai", save=False)
     paint_history()
     message = st.chat_input("Ask anything about your file...")
