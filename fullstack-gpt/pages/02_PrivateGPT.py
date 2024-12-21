@@ -67,9 +67,9 @@ def embed_file(file):
     vector = embeddings.embed_query("Test query")
     st.markdown(len(vector))
 
-    cached_embeddings = HuggingFaceEmbeddings.from_bytes_store(embeddings, cache_dir)
+    cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
     vectorstore = FAISS.from_documents(docs, cached_embeddings)
-    st.markdown(vectorstore.index.d)
+    st.markdown(f"Embedding dimension: {vectorstore.index.d}")
     # st.markdown(f"Embedding dimension: {vectorstore._embedding_function.client.get_collection(vectorstore._collection.name).count()}")
     # st.markdown(f"Embedding dimension: {vectorstore.embedding_function.dimension}")
     # st.markdown(f"Embedding dimension: {len(vectorstore._embedding_function.embed_query('test'))}")

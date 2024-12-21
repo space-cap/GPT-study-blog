@@ -184,3 +184,15 @@ pip install qdrant-client
 
 pip install -U langchain-community langchain-chroma chromadb
 
+ollama pull nomic-embed-text
+
+ollama run mistral
+
+
+
+
+
+
+
+
+
