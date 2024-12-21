@@ -9,7 +9,11 @@ from langchain.vectorstores import Chroma
 from langchain_ollama import ChatOllama
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
+import logging
 
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 st.set_page_config(
     page_title="PrivateGPT",
