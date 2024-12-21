@@ -68,7 +68,7 @@ def embed_file(file):
     st.markdown(index_dim.d)
 
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
-    vectorstore = FAISS.from_documents(docs, cached_embeddings, index_dim=index_dim)
+    vectorstore = FAISS.from_documents(docs, cached_embeddings, index=index_dim)
     retriever = vectorstore.as_retriever()
 
     return retriever
