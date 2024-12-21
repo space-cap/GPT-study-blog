@@ -57,9 +57,15 @@ def embed_file(file):
     )
     loader = TextLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
+    
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    vector = embeddings.embed_query("Test query")
+    st.markdown(len(vector))
+
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
     vectorstore = FAISS.from_documents(docs, cached_embeddings)
+    st.markdown(vectorstore.index.d)
+
     retriever = vectorstore.as_retriever()
     return retriever
 
@@ -103,7 +109,7 @@ prompt = ChatPromptTemplate.from_messages(
 )
 
 
-st.title("DocumentGPT")
+st.title("PrivateGPT")
 
 st.markdown(
     """
