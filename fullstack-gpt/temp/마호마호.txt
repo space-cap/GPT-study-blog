@@ -167,6 +167,8 @@ pip install langchain-huggingface
 
 C:\Users\username\.cache\huggingface\hub
 
+pip install ollama langchain langchain_community
+pip install -U langchain-community
 
 
 

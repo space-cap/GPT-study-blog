@@ -12,6 +12,7 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chat_models import ChatOllama
 import streamlit as st
 
+
 st.set_page_config(
     page_title="PrivateGPT",
     page_icon="📃",
@@ -117,7 +118,7 @@ Welcome!
             
 Use this chatbot to ask questions to an AI about your files!
 
-Upload your files on the sidebar.
+Upload your files on the sidebar. 1
 """
 )
 
