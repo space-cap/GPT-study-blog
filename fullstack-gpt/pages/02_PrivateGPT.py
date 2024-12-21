@@ -1,57 +1,63 @@
-from langchain.prompts import ChatPromptTemplate
-from langchain.document_loaders import UnstructuredFileLoader
+import time
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain.document_loaders import TextLoader
 from langchain.embeddings import CacheBackedEmbeddings, OllamaEmbeddings
-from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain.storage import LocalFileStore
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores.faiss import FAISS
-from langchain.chat_models import ChatOllama
+from langchain.prompts import ChatPromptTemplate
+from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
+from langchain_community.vectorstores import FAISS
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
+from langchain.chat_models import ChatOllama
+
 
 st.set_page_config(
-    page_title="PrivateGPT",
+    page_title="DocumentGPT",
     page_icon="📃",
 )
 
-
 class ChatCallbackHandler(BaseCallbackHandler):
-    message = ""
-
-    def on_llm_start(self, *args, **kwargs):
+    
+    def __init__(self):
         self.message_box = st.empty()
+        self.message = ""
+    
+    def on_llm_start(self, *args, **kwargs):
+        print("LLM 생성 시작...")
 
     def on_llm_end(self, *args, **kwargs):
         save_message(self.message, "ai")
+        print("\nLLM 생성 완료!")
 
-    def on_llm_new_token(self, token, *args, **kwargs):
+    def on_llm_new_token(self, token: str, **kwargs) -> None:
+        print(f"새로운 토큰: {token}", end="", flush=True)
         self.message += token
-        self.message_box.markdown(self.message)
+        self.message_box.markdown(self.message + "▌")
+        
 
+handler = ChatCallbackHandler()
 
 llm = ChatOllama(
     model="mistral:latest",
     temperature=0.1,
     streaming=True,
-    callbacks=[
-        ChatCallbackHandler(),
-    ],
-)
+    )
 
-
-@st.cache_data(show_spinner="Embedding file...")
+@st.cache_resource(show_spinner="Embedding file...")
 def embed_file(file):
     file_content = file.read()
-    file_path = f"./.cache/private_files/{file.name}"
+    file_path = f"./.cache/files/{file.name}"
     with open(file_path, "wb") as f:
         f.write(file_content)
-    cache_dir = LocalFileStore(f"./.cache/private_embeddings/{file.name}")
+    cache_dir = LocalFileStore(f"./.cache/embeddings/{file.name}")
     splitter = CharacterTextSplitter.from_tiktoken_encoder(
         separator="\n",
         chunk_size=600,
         chunk_overlap=100,
     )
-    loader = UnstructuredFileLoader(file_path)
+    loader = TextLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
     embeddings = OllamaEmbeddings(model="mistral:latest")
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
@@ -84,16 +90,22 @@ def format_docs(docs):
     return "\n\n".join(document.page_content for document in docs)
 
 
-prompt = ChatPromptTemplate.from_template(
-    """Answer the question using ONLY the following context and not your training data. If you don't know the answer just say you don't know. DON'T make anything up.
-    
-    Context: {context}
-    Question:{question}
-    """
+prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """
+            Answer the question using ONLY the following context. If you don't know the answer just say you don't know. DON'T make anything up.
+            
+            Context: {context}
+            """,
+        ),
+        ("human", "{question}"),
+    ]
 )
 
 
-st.title("PrivateGPT")
+st.title("DocumentGPT")
 
 st.markdown(
     """
@@ -127,10 +139,21 @@ if file:
             | llm
         )
         with st.chat_message("ai"):
-            chain.invoke(message)
-
-
+            response = st.empty()
+            full_response = ""
+            for chunk in chain.stream(message):
+                full_response += chunk.content
+                response.markdown(full_response)
+            save_message(full_response, "ai")
+            # st.write_stream(chunk.content for chunk in chain.stream(message))
+            #response = chain.invoke(message, config={"callbacks": [handler]})
+            #print(response.content)
+            
+        # 최종 결과 표시
+        # st.subheader("최종 답변:")
+        # st.write(response.content)
+            
 else:
     st.session_state["messages"] = []
 
-    
+
