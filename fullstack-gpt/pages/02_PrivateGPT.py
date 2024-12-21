@@ -2,20 +2,14 @@ import time
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.document_loaders import TextLoader
-from langchain.embeddings import CacheBackedEmbeddings, OllamaEmbeddings
+from langchain.embeddings import CacheBackedEmbeddings, OpenAIEmbeddings
 from langchain.storage import LocalFileStore
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain_community.vectorstores import FAISS
-from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
-from langchain.chat_models import ChatOllama
-import faiss
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
-
 
 st.set_page_config(
     page_title="DocumentGPT",
@@ -43,15 +37,11 @@ class ChatCallbackHandler(BaseCallbackHandler):
 
 handler = ChatCallbackHandler()
 
-llm = ChatOllama(
-    model="mistral:latest",
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash", 
     temperature=0.1,
     streaming=True,
     )
-
-client = QdrantClient(":memory:")  # Use in-memory storage for this example
-collection_name = "my_collection"
-
 
 @st.cache_resource(show_spinner="Embedding file...")
 def embed_file(file):
@@ -67,29 +57,10 @@ def embed_file(file):
     )
     loader = TextLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
-    embeddings = OllamaEmbeddings(model="mistral:latest")
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
-
-    # 차원 수 설정
-    embedding_dim = len(embeddings.embed_query("Sample text"))
-    st.markdown(embedding_dim)
-
-    client.create_collection(
-        collection_name=collection_name,
-        vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE),
-    )
-
-    # Insert vectors
-    client.upload_records(
-        collection_name=collection_name,
-        records=[
-            (i, doc.page_content, cached_embeddings.embed_query(doc.page_content))
-            for i, doc in enumerate(docs)
-        ],
-    )
-
-    retriever = client.search(collection_name, query_vector=query_vector, limit=k)
-
+    vectorstore = FAISS.from_documents(docs, cached_embeddings)
+    retriever = vectorstore.as_retriever()
     return retriever
 
 
@@ -132,7 +103,7 @@ prompt = ChatPromptTemplate.from_messages(
 )
 
 
-st.title("PrivateGPT")
+st.title("DocumentGPT")
 
 st.markdown(
     """
