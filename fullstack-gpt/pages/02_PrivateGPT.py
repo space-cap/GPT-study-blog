@@ -10,7 +10,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain_community.vectorstores import FAISS
 from langchain.vectorstores import Chroma
-from langchain.chat_models import ChatOllama
+from langchain_ollama import ChatOllama
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
 
