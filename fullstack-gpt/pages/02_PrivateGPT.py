@@ -3,13 +3,14 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.document_loaders import TextLoader
 from langchain.embeddings import CacheBackedEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain.storage import LocalFileStore
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain_community.vectorstores import FAISS
-from langchain.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma
 from langchain_ollama import ChatOllama
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
@@ -66,9 +67,12 @@ def embed_file(file):
     vector = embeddings.embed_query("Test query")
     st.markdown(len(vector))
 
-    cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
-    vectorstore = Chroma.from_documents(docs, cached_embeddings)
+    cached_embeddings = HuggingFaceEmbeddings.from_bytes_store(embeddings, cache_dir)
+    vectorstore = FAISS.from_documents(docs, cached_embeddings)
     st.markdown(vectorstore.index.d)
+    # st.markdown(f"Embedding dimension: {vectorstore._embedding_function.client.get_collection(vectorstore._collection.name).count()}")
+    # st.markdown(f"Embedding dimension: {vectorstore.embedding_function.dimension}")
+    # st.markdown(f"Embedding dimension: {len(vectorstore._embedding_function.embed_query('test'))}")
 
     retriever = vectorstore.as_retriever()
     return retriever

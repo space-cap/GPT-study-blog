@@ -175,10 +175,12 @@ pip install -U langchain-ollama
 
 pip install -U langchain langchain-community faiss-cpu streamlit
 
+pip install langchain langchain_community ollama
 
 
 
 pip install qdrant-client
 
 
+pip install -U langchain-community langchain-chroma chromadb
 
