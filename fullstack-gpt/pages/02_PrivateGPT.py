@@ -13,6 +13,8 @@ from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
 from langchain.chat_models import ChatOllama
 import faiss
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
 
 
 st.set_page_config(
@@ -47,6 +49,10 @@ llm = ChatOllama(
     streaming=True,
     )
 
+client = QdrantClient(":memory:")  # Use in-memory storage for this example
+collection_name = "my_collection"
+
+
 @st.cache_resource(show_spinner="Embedding file...")
 def embed_file(file):
     file_content = file.read()
@@ -62,20 +68,27 @@ def embed_file(file):
     loader = TextLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
     embeddings = OllamaEmbeddings(model="mistral:latest")
+    cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
 
-    #vector = embeddings.embed_query("Test query")
-    #st.markdown(len(vector))
     # 차원 수 설정
     embedding_dim = len(embeddings.embed_query("Sample text"))
+    st.markdown(embedding_dim)
 
-    cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
-    vectorstore = FAISS.from_documents(docs, cached_embeddings)
-    
-    
-    
-        
-    
-    retriever = vectorstore.as_retriever()
+    client.create_collection(
+        collection_name=collection_name,
+        vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE),
+    )
+
+    # Insert vectors
+    client.upload_records(
+        collection_name=collection_name,
+        records=[
+            (i, doc.page_content, cached_embeddings.embed_query(doc.page_content))
+            for i, doc in enumerate(docs)
+        ],
+    )
+
+    retriever = client.search(collection_name, query_vector=query_vector, limit=k)
 
     return retriever
 

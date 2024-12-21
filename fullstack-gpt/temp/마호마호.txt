@@ -178,6 +178,7 @@ pip install -U langchain langchain-community faiss-cpu streamlit
 
 
 
+pip install qdrant-client
 
 
 
