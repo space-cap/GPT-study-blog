@@ -10,6 +10,7 @@ from langchain_ollama import ChatOllama
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
 import logging
+import chromadb
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -55,9 +56,28 @@ def embed_file(file):
     loader = TextLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
     embeddings = OllamaEmbeddings(model="mistral:latest")
-    cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
+
+
+
     persist_directory = "./chroma_db"
-    vectorstore = Chroma.from_documents(docs, cached_embeddings, persist_directory=persist_directory)
+    
+    client = chromadb.PersistentClient(path=persist_directory)
+    collection_name = f"collection_{file.name}"
+    collection = client.get_or_create_collection(
+        name=collection_name,
+        embedding_function=embeddings,
+        metadata={"hnsw:space": "cosine"}
+    )
+    
+    vectorstore = Chroma(
+        client=client,
+        collection_name=collection_name,
+        embedding_function=embeddings,
+        persist_directory=persist_directory
+    )
+    
+    vectorstore.add_documents(docs)
+    
     retriever = vectorstore.as_retriever()
     return retriever
 
