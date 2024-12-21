@@ -2,13 +2,14 @@ import time
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.document_loaders import TextLoader
-from langchain.embeddings import CacheBackedEmbeddings, OpenAIEmbeddings
+from langchain.embeddings import CacheBackedEmbeddings, OllamaEmbeddings
 from langchain.storage import LocalFileStore
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain_community.vectorstores import FAISS
 from langchain.callbacks.base import BaseCallbackHandler
+from langchain.chat_models import ChatOllama
 import streamlit as st
 
 st.set_page_config(
@@ -37,11 +38,14 @@ class ChatCallbackHandler(BaseCallbackHandler):
 
 handler = ChatCallbackHandler()
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash", 
+llm = ChatOllama(
+    model="mistral:latest",
     temperature=0.1,
     streaming=True,
-    )
+    callbacks=[
+        ChatCallbackHandler(),
+    ],
+)
 
 @st.cache_resource(show_spinner="Embedding file...")
 def embed_file(file):
@@ -57,7 +61,9 @@ def embed_file(file):
     )
     loader = TextLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    embeddings = OllamaEmbeddings(
+        model="mistral:latest",
+    )
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
     vectorstore = FAISS.from_documents(docs, cached_embeddings)
     retriever = vectorstore.as_retriever()
