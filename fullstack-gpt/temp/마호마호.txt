@@ -235,3 +235,12 @@ model은 "mistral:latest"를 사용하고 싶어.
 문서를 외부 txt 파일에서 읽어서 사용을 하고 싶어.
 파일 위치는 ./files/chapter_one.txt
 
+hummus
+
+pip install wikipedia
+
+pip install beautifulsoup4
+
+pip install python-magic-bin
+
+
