@@ -1,206 +1,14 @@
-import json
-
+import streamlit as st
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.prompts import ChatPromptTemplate
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain.prompts import ChatPromptTemplate
-from langchain.callbacks import StreamingStdOutCallbackHandler
-import streamlit as st
+import json
+import os
 from langchain.retrievers import WikipediaRetriever
 from langchain.schema import BaseOutputParser, output_parser
 
 
-class JsonOutputParser(BaseOutputParser):
-    def parse(self, text):
-        text = text.replace("```", "").replace("json", "")
-        return json.loads(text)
-
-
-output_parser = JsonOutputParser()
-
-st.set_page_config(
-    page_title="QuizGPT",
-    page_icon="❓",
-)
-
-st.title("QuizGPT")
-
-llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash", 
-    temperature=0.1,
-    streaming=True,
-    callbacks=[StreamingStdOutCallbackHandler()],
-    )
-
-
-def format_docs(docs):
-    return "\n\n".join(document.page_content for document in docs)
-
-
-questions_prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            """
-    You are a helpful assistant that is role playing as a teacher.
-         
-    Based ONLY on the following context make 10 (TEN) questions minimum to test the user's knowledge about the text.
-    
-    Each question should have 4 answers, three of them must be incorrect and one should be correct.
-         
-    Use (o) to signal the correct answer.
-         
-    Question examples:
-         
-    Question: What is the color of the ocean?
-    Answers: Red|Yellow|Green|Blue(o)
-         
-    Question: What is the capital or Georgia?
-    Answers: Baku|Tbilisi(o)|Manila|Beirut
-         
-    Question: When was Avatar released?
-    Answers: 2007|2001|2009(o)|1998
-         
-    Question: Who was Julius Caesar?
-    Answers: A Roman Emperor(o)|Painter|Actor|Model
-         
-    Your turn!
-         
-    Context: {context}
-""",
-        )
-    ]
-)
-
-questions_chain = {"context": format_docs} | questions_prompt | llm
-
-formatting_prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            """
-    You are a powerful formatting algorithm.
-     
-    You format exam questions into JSON format.
-    Answers with (o) are the correct ones.
-     
-    Example Input:
-
-    Question: What is the color of the ocean?
-    Answers: Red|Yellow|Green|Blue(o)
-         
-    Question: What is the capital or Georgia?
-    Answers: Baku|Tbilisi(o)|Manila|Beirut
-         
-    Question: When was Avatar released?
-    Answers: 2007|2001|2009(o)|1998
-         
-    Question: Who was Julius Caesar?
-    Answers: A Roman Emperor(o)|Painter|Actor|Model
-    
-     
-    Example Output:
-     
-    ```json
-    {{ "questions": [
-            {{
-                "question": "What is the color of the ocean?",
-                "answers": [
-                        {{
-                            "answer": "Red",
-                            "correct": false
-                        }},
-                        {{
-                            "answer": "Yellow",
-                            "correct": false
-                        }},
-                        {{
-                            "answer": "Green",
-                            "correct": false
-                        }},
-                        {{
-                            "answer": "Blue",
-                            "correct": true
-                        }},
-                ]
-            }},
-                        {{
-                "question": "What is the capital or Georgia?",
-                "answers": [
-                        {{
-                            "answer": "Baku",
-                            "correct": false
-                        }},
-                        {{
-                            "answer": "Tbilisi",
-                            "correct": true
-                        }},
-                        {{
-                            "answer": "Manila",
-                            "correct": false
-                        }},
-                        {{
-                            "answer": "Beirut",
-                            "correct": false
-                        }},
-                ]
-            }},
-                        {{
-                "question": "When was Avatar released?",
-                "answers": [
-                        {{
-                            "answer": "2007",
-                            "correct": false
-                        }},
-                        {{
-                            "answer": "2001",
-                            "correct": false
-                        }},
-                        {{
-                            "answer": "2009",
-                            "correct": true
-                        }},
-                        {{
-                            "answer": "1998",
-                            "correct": false
-                        }},
-                ]
-            }},
-            {{
-                "question": "Who was Julius Caesar?",
-                "answers": [
-                        {{
-                            "answer": "A Roman Emperor",
-                            "correct": true
-                        }},
-                        {{
-                            "answer": "Painter",
-                            "correct": false
-                        }},
-                        {{
-                            "answer": "Actor",
-                            "correct": false
-                        }},
-                        {{
-                            "answer": "Model",
-                            "correct": false
-                        }},
-                ]
-            }}
-        ]
-     }}
-    ```
-    Your turn!
-
-    Questions: {context}
-
-""",
-        )
-    ]
-)
-
-formatting_chain = formatting_prompt | llm
 
 
 @st.cache_resource(show_spinner="Loading file...")
@@ -209,20 +17,12 @@ def split_file(file):
     file_path = f"./.cache/quiz_files/{file.name}"
     with open(file_path, "wb") as f:
         f.write(file_content)
-    splitter = CharacterTextSplitter.from_tiktoken_encoder(
-        separator="\n",
-        chunk_size=600,
-        chunk_overlap=100,
-    )
+    
     loader = UnstructuredFileLoader(file_path)
-    docs = loader.load_and_split(text_splitter=splitter)
+    documents = loader.load()
+    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    docs = text_splitter.split_documents(documents)
     return docs
-
-
-@st.cache_resource(show_spinner="Making quiz...")
-def run_quiz_chain(_docs, topic):
-    chain = {"context": questions_chain} | formatting_chain | output_parser
-    return chain.invoke(_docs)
 
 
 @st.cache_resource(show_spinner="Searching Wikipedia...")
@@ -230,6 +30,20 @@ def wiki_search(term):
     retriever = WikipediaRetriever(top_k_results=5)
     docs = retriever.get_relevant_documents(term)
     return docs
+
+
+@st.cache_resource(show_spinner="Making quiz...")
+def run_quiz_chain(_docs, topic):
+    # 전체 텍스트 결합
+    full_text = " ".join([doc.page_content for doc in docs])
+    
+    # LLM을 사용하여 문제 생성
+    response = llm.invoke(prompt.format(text=full_text))
+    cleaned_string = response.content.replace('```', '').replace('json', '', 1).strip()
+    
+    # JSON 파싱
+    questions_json = json.loads(cleaned_string)
+    return questions_json
 
 
 with st.sidebar:
@@ -255,6 +69,49 @@ with st.sidebar:
             docs = wiki_search(topic)
 
 
+# LLM 모델 초기화
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.1,)
+
+# 프롬프트 템플릿 정의
+template = """
+다음 텍스트를 기반으로 4지선다형 문제 10개를 만들어주세요:
+
+{text}
+
+문제와 답변을 다음 JSON 형식으로 제공해주세요:
+{{ "questions": [
+            {{
+                "question": "What is the color of the ocean?",
+                "answers": [
+                        {{
+                            "answer": "Red",
+                            "correct": false
+                        }},
+                        {{
+                            "answer": "Yellow",
+                            "correct": false
+                        }},
+                        {{
+                            "answer": "Green",
+                            "correct": false
+                        }},
+                        {{
+                            "answer": "Blue",
+                            "correct": true
+                        }},
+                ]
+            }},
+        ...
+    ]
+}}
+"""
+
+prompt = ChatPromptTemplate.from_template(template)
+
+# Streamlit 앱
+st.title("QuizGPT")
+
+
 if not docs:
     st.markdown(
         """
@@ -266,9 +123,14 @@ if not docs:
     """
     )
 else:
-    response = run_quiz_chain(docs, topic if topic else file.name)
+    questions_json = run_quiz_chain(docs, topic if topic else file.name)
+    
+    # 결과 표시
+    # st.json(questions_json)
+    
+    # 문제 및 선택지 표시
     with st.form("questions_form"):
-        for question in response["questions"]:
+        for question in questions_json["questions"]:
             st.write(question["question"])
             value = st.radio(
                 "Select an option.",
@@ -280,3 +142,5 @@ else:
             elif value is not None:
                 st.error("Wrong!")
         button = st.form_submit_button()
+
+        
