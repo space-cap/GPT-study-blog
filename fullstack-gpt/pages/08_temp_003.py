@@ -126,7 +126,7 @@ else:
     questions_json = run_quiz_chain(docs, topic if topic else file.name)
     
     # 결과 표시
-    st.json(questions_json)
+    # st.json(questions_json)
     
     # 문제 및 선택지 표시
     with st.form("questions_form"):
