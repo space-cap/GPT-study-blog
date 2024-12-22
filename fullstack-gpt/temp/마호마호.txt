@@ -251,3 +251,17 @@ https://openai.com/api/pricing
 https://openai.com/index/gpt-4o-mini-advancing-cost-efficient-intelligence/
 https://platform.openai.com/docs/models/gpt-4o-mini#gpt-4o-mini
 
+google_genai.chat_models.
+
+genai 모델 중에서 무료인 모델이 뭐가 있어?
+
+pip install --upgrade langchain langchain-google-genai google-generativeai
+
+
+문서를 외부 txt 파일에서 읽어서 4지선다형 문제 10개를 만드는 코드를 생성하고 싶어.
+파일 위치는 ./files/chapter_one.txt
+import streamlit as st
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.prompts import ChatPromptTemplate
+from langchain.document_loaders import UnstructuredFileLoader
+from langchain.text_splitter import CharacterTextSplitter

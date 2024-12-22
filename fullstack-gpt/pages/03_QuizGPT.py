@@ -17,7 +17,7 @@ st.set_page_config(
 st.title("QuizGPT")
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-pro", 
+    model="gemini-1.5-flash", 
     temperature=0.1,
     streaming=True,
     callbacks=[StreamingStdOutCallbackHandler()],
@@ -125,3 +125,4 @@ else:
         st.text("lee")
         response = llm(full_prompt)
         st.text(response.content)
+        
