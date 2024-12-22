@@ -1,12 +1,22 @@
+import json
+from operator import rshift
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.callbacks import StreamingStdOutCallbackHandler
 import streamlit as st
 from langchain.retrievers import WikipediaRetriever
+from langchain.schema import BaseOutputParser, output_parser
 
+
+class JsonOutputParser(BaseOutputParser):
+    def parse(self, text):
+        text = text.replace("```", "").replace("json", "")
+        return json.loads(text)
+
+
+output_parser = JsonOutputParser()
 
 st.set_page_config(
     page_title="QuizGPT",
@@ -15,12 +25,13 @@ st.set_page_config(
 
 st.title("QuizGPT")
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash", 
+llm = ChatOpenAI(
     temperature=0.1,
+    model="gpt-3.5-turbo-1106",
     streaming=True,
     callbacks=[StreamingStdOutCallbackHandler()],
-    )
+)
+
 
 def format_docs(docs):
     return "\n\n".join(document.page_content for document in docs)
@@ -245,9 +256,6 @@ else:
     start = st.button("Generate Quiz")
 
     if start:
-        questions_response = questions_chain.invoke(docs)
-        st.write(questions_response.content)
-        formatting_response = formatting_chain.invoke(
-            {"context": questions_response.content}
-        )
-        st.write(formatting_response.content)
+        chain = {"context": questions_chain} | formatting_chain | output_parser
+        response = chain.invoke(docs)
+        st.write(response)
