@@ -284,4 +284,11 @@ from langchain.text_splitter import CharacterTextSplitter
             st.write("---")
 			
 			
-			
+최근에 langchain_experimental에서 ollama버전으로도 function call을 만들어줘서 공유드려요.
+(https://python.langchain.com/docs/integrations/chat/ollama_functions)
+
+https://github.com/Im-younique/fullstack-gpt/blob/120139bdeae23f69f5f30cdbb9e143cfdd77bedf/pages/QuizGPT.py
+
+잘 만들었네.
+https://github.com/daehyeong2/fullstack-gpt/blob/cb46778b63ef20d06aec13febcde696e4978e514/pages/03_QuizGPT.py
+
