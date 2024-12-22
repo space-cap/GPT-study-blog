@@ -1,11 +1,13 @@
-import os
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import CharacterTextSplitter
+from langchain.chat_models import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 from langchain.callbacks import StreamingStdOutCallbackHandler
 import streamlit as st
 from langchain.retrievers import WikipediaRetriever
+
 
 st.set_page_config(
     page_title="QuizGPT",
@@ -19,13 +21,13 @@ llm = ChatGoogleGenerativeAI(
     temperature=0.1,
     streaming=True,
     callbacks=[StreamingStdOutCallbackHandler()],
-)
+    )
 
-@st.cache_resource(show_spinner="Loading file...")
+
+@st.cache_data(show_spinner="Loading file...")
 def split_file(file):
     file_content = file.read()
     file_path = f"./.cache/quiz_files/{file.name}"
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, "wb") as f:
         f.write(file_content)
     splitter = CharacterTextSplitter.from_tiktoken_encoder(
@@ -37,8 +39,10 @@ def split_file(file):
     docs = loader.load_and_split(text_splitter=splitter)
     return docs
 
+
 def format_docs(docs):
-    return "\n\n".join([doc.page_content for doc in docs if doc.page_content.strip()])
+    return "\n\n".join(document.page_content for document in docs)
+
 
 with st.sidebar:
     docs = None
@@ -60,8 +64,9 @@ with st.sidebar:
         topic = st.text_input("Search Wikipedia...")
         if topic:
             retriever = WikipediaRetriever(top_k_results=5)
-            with st.spinner("Searching Wikipedia..."):
+            with st.status("Searching Wikipedia..."):
                 docs = retriever.get_relevant_documents(topic)
+
 
 if not docs:
     st.markdown(
@@ -74,35 +79,44 @@ if not docs:
     """
     )
 else:
-    context = format_docs(docs)
-    if not context.strip():
-        st.error("No valid content found in the provided documents.")
-    else:
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    """
-                    You are a helpful assistant that is role playing as a teacher.
-                    
-                    Based ONLY on the following context make 10 questions to test the user's knowledge about the text.
-                    
-                    Each question should have 4 answers, three of them must be incorrect and one should be correct.
-                    
-                    Use (o) to signal the correct answer.
-                    
-                    Context: {context}
-                    """,
-                )
-            ]
-        )
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                """
+    You are a helpful assistant that is role playing as a teacher.
+         
+    Based ONLY on the following context make 10 questions to test the user's knowledge about the text.
+    
+    Each question should have 4 answers, three of them must be incorrect and one should be correct.
+         
+    Use (o) to signal the correct answer.
+         
+    Question examples:
+         
+    Question: What is the color of the ocean?
+    Answers: Red|Yellow|Green|Blue(o)
+         
+    Question: What is the capital or Georgia?
+    Answers: Baku|Tbilisi(o)|Manila|Beirut
+         
+    Question: When was Avatar released?
+    Answers: 2007|2001|2009(o)|1998
+         
+    Question: Who was Julius Caesar?
+    Answers: A Roman Emperor(o)|Painter|Actor|Model
+         
+    Your turn!
+         
+    Context: {context}
+""",
+            )
+        ]
+    )
 
-        full_prompt = prompt.format_prompt(context=context).to_messages()
+    chain = {"context": format_docs} | prompt | llm
 
-        start = st.button("Generate Quiz")
-        if start:
-            try:
-                response = llm(full_prompt)
-                st.text(response.content)
-            except Exception as e:
-                st.error(f"Error: {str(e)}")
+    start = st.button("Generate Quiz")
+
+    if start:
+        chain.invoke(docs)
