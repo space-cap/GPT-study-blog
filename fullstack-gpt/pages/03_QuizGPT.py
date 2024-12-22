@@ -2,7 +2,8 @@ import json
 from operator import rshift
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.chat_models import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 from langchain.callbacks import StreamingStdOutCallbackHandler
 import streamlit as st
@@ -25,13 +26,12 @@ st.set_page_config(
 
 st.title("QuizGPT")
 
-llm = ChatOpenAI(
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash", 
     temperature=0.1,
-    model="gpt-3.5-turbo-1106",
     streaming=True,
     callbacks=[StreamingStdOutCallbackHandler()],
-)
-
+    )
 
 def format_docs(docs):
     return "\n\n".join(document.page_content for document in docs)
