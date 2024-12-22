@@ -6,7 +6,7 @@ from langchain.text_splitter import CharacterTextSplitter
 import os
 
 # Google API 키 설정
-os.environ["GOOGLE_API_KEY"] = "your_google_api_key_here"
+# os.environ["GOOGLE_API_KEY"] = "your_google_api_key_here"
 
 # 파일 로드
 loader = UnstructuredFileLoader("./files/chapter_one.txt")

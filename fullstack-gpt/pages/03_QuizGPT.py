@@ -123,6 +123,6 @@ else:
     if start:
         #chain.invoke(docs)
         st.text("lee")
-        response = llm(full_prompt)
+        response = llm.invoke(full_prompt)
         st.text(response.content)
         
