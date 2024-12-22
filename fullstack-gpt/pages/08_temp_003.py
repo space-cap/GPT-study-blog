@@ -5,6 +5,56 @@ from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import CharacterTextSplitter
 import json
 import os
+from langchain.retrievers import WikipediaRetriever
+from langchain.schema import BaseOutputParser, output_parser
+
+
+
+@st.cache_resource(show_spinner="Loading file...")
+def split_file(file):
+    file_content = file.read()
+    file_path = f"./.cache/quiz_files/{file.name}"
+    with open(file_path, "wb") as f:
+        f.write(file_content)
+    splitter = CharacterTextSplitter.from_tiktoken_encoder(
+        separator="\n",
+        chunk_size=600,
+        chunk_overlap=100,
+    )
+    loader = UnstructuredFileLoader(file_path)
+    docs = loader.load_and_split(text_splitter=splitter)
+    return docs
+
+
+@st.cache_resource(show_spinner="Searching Wikipedia...")
+def wiki_search(term):
+    retriever = WikipediaRetriever(top_k_results=5)
+    docs = retriever.get_relevant_documents(term)
+    return docs
+
+
+with st.sidebar:
+    docs = None
+    topic = None
+    choice = st.selectbox(
+        "Choose what you want to use.",
+        (
+            "File",
+            "Wikipedia Article",
+        ),
+    )
+    if choice == "File":
+        file = st.file_uploader(
+            "Upload a .docx , .txt or .pdf file",
+            type=["pdf", "txt", "docx"],
+        )
+        if file:
+            docs = split_file(file)
+    else:
+        topic = st.text_input("Search Wikipedia...")
+        if topic:
+            docs = wiki_search(topic)
+
 
 # 문서 로드 및 분할
 loader = UnstructuredFileLoader("./files/chapter_one.txt")
@@ -70,8 +120,18 @@ if st.button("문제 생성"):
         st.json(questions_json)
         
         # 문제 및 선택지 표시
-        for i, q in enumerate(questions_json["questions"], 1):
-            st.subheader(f"문제 {i}")
-            st.write("---")
+        with st.form("questions_form"):
+            for question in questions_json["questions"]:
+                st.write(question["question"])
+                value = st.radio(
+                    "Select an option.",
+                    [answer["answer"] for answer in question["answers"]],
+                    index=None,
+                )
+                if {"answer": value, "correct": True} in question["answers"]:
+                    st.success("Correct!")
+                elif value is not None:
+                    st.error("Wrong!")
+            button = st.form_submit_button()
 
         
