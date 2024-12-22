@@ -32,6 +32,20 @@ def wiki_search(term):
     return docs
 
 
+@st.cache_resource(show_spinner="Making quiz...")
+def run_quiz_chain(_docs, topic):
+    # 전체 텍스트 결합
+    full_text = " ".join([doc.page_content for doc in docs])
+    
+    # LLM을 사용하여 문제 생성
+    response = llm.invoke(prompt.format(text=full_text))
+    cleaned_string = response.content.replace('```', '').replace('json', '', 1).strip()
+    
+    # JSON 파싱
+    questions_json = json.loads(cleaned_string)
+    return questions_json
+
+
 with st.sidebar:
     docs = None
     topic = None
@@ -54,12 +68,6 @@ with st.sidebar:
         if topic:
             docs = wiki_search(topic)
 
-
-# 문서 로드 및 분할
-loader = UnstructuredFileLoader("./files/chapter_one.txt")
-documents = loader.load()
-text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-texts = text_splitter.split_documents(documents)
 
 # LLM 모델 초기화
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.1,)
@@ -101,36 +109,38 @@ template = """
 prompt = ChatPromptTemplate.from_template(template)
 
 # Streamlit 앱
-st.title("4지선다형 문제 생성기")
+st.title("QuizGPT")
 
-if st.button("문제 생성"):
-    with st.spinner("문제를 생성 중입니다..."):
-        # 전체 텍스트 결합
-        full_text = " ".join([doc.page_content for doc in texts])
-        
-        # LLM을 사용하여 문제 생성
-        response = llm.invoke(prompt.format(text=full_text))
-        cleaned_string = response.content.replace('```', '').replace('json', '', 1).strip()
-        
-        # JSON 파싱
-        questions_json = json.loads(cleaned_string)
-        
-        # 결과 표시
-        st.json(questions_json)
-        
-        # 문제 및 선택지 표시
-        with st.form("questions_form"):
-            for question in questions_json["questions"]:
-                st.write(question["question"])
-                value = st.radio(
-                    "Select an option.",
-                    [answer["answer"] for answer in question["answers"]],
-                    index=None,
-                )
-                if {"answer": value, "correct": True} in question["answers"]:
-                    st.success("Correct!")
-                elif value is not None:
-                    st.error("Wrong!")
-            button = st.form_submit_button()
+
+if not docs:
+    st.markdown(
+        """
+    Welcome to QuizGPT.
+                
+    I will make a quiz from Wikipedia articles or files you upload to test your knowledge and help you study.
+                
+    Get started by uploading a file or searching on Wikipedia in the sidebar.
+    """
+    )
+else:
+    questions_json = run_quiz_chain(docs, topic if topic else file.name)
+    
+    # 결과 표시
+    st.json(questions_json)
+    
+    # 문제 및 선택지 표시
+    with st.form("questions_form"):
+        for question in questions_json["questions"]:
+            st.write(question["question"])
+            value = st.radio(
+                "Select an option.",
+                [answer["answer"] for answer in question["answers"]],
+                index=None,
+            )
+            if {"answer": value, "correct": True} in question["answers"]:
+                st.success("Correct!")
+            elif value is not None:
+                st.error("Wrong!")
+        button = st.form_submit_button()
 
         
