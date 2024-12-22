@@ -1,5 +1,5 @@
 import json
-from operator import rshift
+
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -33,6 +33,7 @@ llm = ChatGoogleGenerativeAI(
     callbacks=[StreamingStdOutCallbackHandler()],
     )
 
+
 def format_docs(docs):
     return "\n\n".join(document.page_content for document in docs)
 
@@ -44,7 +45,7 @@ questions_prompt = ChatPromptTemplate.from_messages(
             """
     You are a helpful assistant that is role playing as a teacher.
          
-    Based ONLY on the following context make 10 questions to test the user's knowledge about the text.
+    Based ONLY on the following context make 10 (TEN) questions minimum to test the user's knowledge about the text.
     
     Each question should have 4 answers, three of them must be incorrect and one should be correct.
          
@@ -202,7 +203,7 @@ formatting_prompt = ChatPromptTemplate.from_messages(
 formatting_chain = formatting_prompt | llm
 
 
-@st.cache_data(show_spinner="Loading file...")
+@st.cache_resource(show_spinner="Loading file...")
 def split_file(file):
     file_content = file.read()
     file_path = f"./.cache/quiz_files/{file.name}"
@@ -215,6 +216,19 @@ def split_file(file):
     )
     loader = UnstructuredFileLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
+    return docs
+
+
+@st.cache_resource(show_spinner="Making quiz...")
+def run_quiz_chain(_docs, topic):
+    chain = {"context": questions_chain} | formatting_chain | output_parser
+    return chain.invoke(_docs)
+
+
+@st.cache_resource(show_spinner="Searching Wikipedia...")
+def wiki_search(term):
+    retriever = WikipediaRetriever(top_k_results=5)
+    docs = retriever.get_relevant_documents(term)
     return docs
 
 
@@ -237,9 +251,7 @@ with st.sidebar:
     else:
         topic = st.text_input("Search Wikipedia...")
         if topic:
-            retriever = WikipediaRetriever(top_k_results=5)
-            with st.status("Searching Wikipedia..."):
-                docs = retriever.get_relevant_documents(topic)
+            docs = wiki_search(topic)
 
 
 if not docs:
@@ -256,6 +268,5 @@ else:
     start = st.button("Generate Quiz")
 
     if start:
-        chain = {"context": questions_chain} | formatting_chain | output_parser
-        response = chain.invoke(docs)
+        response = run_quiz_chain(docs, topic if topic else file.name)
         st.write(response)
