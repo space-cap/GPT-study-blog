@@ -17,7 +17,7 @@ st.set_page_config(
 st.title("QuizGPT")
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash", 
+    model="gemini-pro", 
     temperature=0.1,
     streaming=True,
     callbacks=[StreamingStdOutCallbackHandler()],
@@ -115,8 +115,13 @@ else:
     )
 
     chain = {"context": format_docs} | prompt | llm
+    full_prompt = prompt.format_prompt(context=format_docs).to_messages()
+    #st.text(full_prompt)
 
     start = st.button("Generate Quiz")
 
     if start:
-        chain.invoke(docs)
+        #chain.invoke(docs)
+        st.text("lee")
+        response = llm(full_prompt)
+        st.text(response.content)
