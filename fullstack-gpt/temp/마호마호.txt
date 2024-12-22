@@ -260,8 +260,10 @@ pip install --upgrade langchain langchain-google-genai google-generativeai
 
 문서를 외부 txt 파일에서 읽어서 4지선다형 문제 10개를 만드는 코드를 생성하고 싶어.
 파일 위치는 ./files/chapter_one.txt
+ChatGoogleGenerativeAI 모델은 "gemini-1.5-flash"를 사용 해줘.
 import streamlit as st
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import CharacterTextSplitter
+또 질문과 정답을 json 으로 보여주는 것도 만들어줘
