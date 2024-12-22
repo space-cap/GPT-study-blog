@@ -3,7 +3,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.chat_models import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import RetrievalQA
-from langchain.text_splitter import CharacterTextSplitter
+from langchain_text_splitters import CharacterTextSplitter
 
 # 문서 준비
 documents = [
@@ -14,13 +14,13 @@ documents = [
 
 # 텍스트 분할
 text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-texts = text_splitter.split_documents(documents)
+texts = text_splitter.create_documents(documents)
 
 # Ollama 임베딩 초기화
 embeddings = OllamaEmbeddings(model="mistral:latest")
 
 # FAISS 벡터 저장소 생성
-vectorstore = FAISS.from_texts(texts, embeddings)
+vectorstore = FAISS.from_documents(texts, embeddings)
 
 # ChatOllama 모델 초기화
 chat_model = ChatOllama(model="mistral:latest")
