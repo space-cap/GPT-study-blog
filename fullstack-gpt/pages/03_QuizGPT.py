@@ -1,6 +1,7 @@
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.chat_models import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import streamlit as st
 from langchain.retrievers import WikipediaRetriever
 
@@ -12,13 +13,13 @@ st.set_page_config(
 
 st.title("QuizGPT")
 
-llm = ChatOpenAI(
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash", 
     temperature=0.1,
-    model="gpt-3.5-turbo-1106",
-)
+    )
 
 
-@st.cache_data(show_spinner="Loading file...")
+@st.cache_resource(show_spinner="Loading file...")
 def split_file(file):
     file_content = file.read()
     file_path = f"./.cache/quiz_files/{file.name}"
