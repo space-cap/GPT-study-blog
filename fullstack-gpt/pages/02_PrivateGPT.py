@@ -2,19 +2,14 @@ import time
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.document_loaders import TextLoader
-from langchain.embeddings import CacheBackedEmbeddings
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain.embeddings import CacheBackedEmbeddings, OpenAIEmbeddings
 from langchain.storage import LocalFileStore
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain_community.vectorstores import FAISS
-from langchain_community.vectorstores import Chroma
-from langchain_ollama import ChatOllama
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
-
 
 st.set_page_config(
     page_title="DocumentGPT",
@@ -42,8 +37,8 @@ class ChatCallbackHandler(BaseCallbackHandler):
 
 handler = ChatCallbackHandler()
 
-llm = ChatOllama(
-    model="mistral:latest",
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash", 
     temperature=0.1,
     streaming=True,
     )
@@ -62,9 +57,9 @@ def embed_file(file):
     )
     loader = TextLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
-    # st.markdown(len(docs))
+    st.markdown(len(docs))
 
-    embeddings = OllamaEmbeddings(model="mistral:latest")
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     vector = embeddings.embed_query("Test query")
     st.markdown(len(vector))
 
@@ -72,13 +67,8 @@ def embed_file(file):
     embedded_query = cached_embeddings.embed_query("This is a test query")
     dimension = len(embedded_query)
     st.markdown(f"임베딩 차원 수: {dimension}")
-
+    
     vectorstore = FAISS.from_documents(docs, cached_embeddings)
-    st.markdown(f"Embedding dimension: {vectorstore.index.d}")
-    # st.markdown(f"Embedding dimension: {vectorstore._embedding_function.client.get_collection(vectorstore._collection.name).count()}")
-    # st.markdown(f"Embedding dimension: {vectorstore.embedding_function.dimension}")
-    # st.markdown(f"Embedding dimension: {len(vectorstore._embedding_function.embed_query('test'))}")
-
     retriever = vectorstore.as_retriever()
     return retriever
 
