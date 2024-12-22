@@ -292,3 +292,10 @@ https://github.com/Im-younique/fullstack-gpt/blob/120139bdeae23f69f5f30cdbb9e143
 잘 만들었네.
 https://github.com/daehyeong2/fullstack-gpt/blob/cb46778b63ef20d06aec13febcde696e4978e514/pages/03_QuizGPT.py
 
+Streamlit 에서 st.ballons 을 사용을 하려고 하는데 예제 코드를 작성해줘.
+
+AzureChatOpenAI
+
+
+
+
