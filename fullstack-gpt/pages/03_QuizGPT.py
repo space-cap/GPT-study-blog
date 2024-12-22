@@ -2,7 +2,6 @@ import os
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 from langchain.callbacks import StreamingStdOutCallbackHandler
 import streamlit as st
@@ -39,7 +38,7 @@ def split_file(file):
     return docs
 
 def format_docs(docs):
-    return "\n\n".join([doc.page_content for doc in docs if doc.page_content])
+    return "\n\n".join([doc.page_content for doc in docs if doc.page_content.strip()])
 
 with st.sidebar:
     docs = None
@@ -76,32 +75,34 @@ if not docs:
     )
 else:
     context = format_docs(docs)
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                """
-                You are a helpful assistant that is role playing as a teacher.
-                
-                Based ONLY on the following context make 10 questions to test the user's knowledge about the text.
-                
-                Each question should have 4 answers, three of them must be incorrect and one should be correct.
-                
-                Use (o) to signal the correct answer.
-                
-                Context: {context}
-                """,
-            )
-        ]
-    )
+    if not context.strip():
+        st.error("No valid content found in the provided documents.")
+    else:
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    """
+                    You are a helpful assistant that is role playing as a teacher.
+                    
+                    Based ONLY on the following context make 10 questions to test the user's knowledge about the text.
+                    
+                    Each question should have 4 answers, three of them must be incorrect and one should be correct.
+                    
+                    Use (o) to signal the correct answer.
+                    
+                    Context: {context}
+                    """,
+                )
+            ]
+        )
 
-    full_prompt = prompt.format_prompt(context=context).to_messages()
-    
-    start = st.button("Generate Quiz")
+        full_prompt = prompt.format_prompt(context=context).to_messages()
 
-    if start:
-        try:
-            response = llm(full_prompt)
-            st.text(response.content)
-        except Exception as e:
-            st.error(f"Error: {str(e)}")
+        start = st.button("Generate Quiz")
+        if start:
+            try:
+                response = llm(full_prompt)
+                st.text(response.content)
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
