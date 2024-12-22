@@ -244,3 +244,10 @@ pip install beautifulsoup4
 pip install python-magic-bin
 
 
+platform.openai.com/tokenizer
+
+https://openai.com/api/pricing
+
+https://openai.com/index/gpt-4o-mini-advancing-cost-efficient-intelligence/
+https://platform.openai.com/docs/models/gpt-4o-mini#gpt-4o-mini
+
