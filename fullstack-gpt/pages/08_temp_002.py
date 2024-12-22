@@ -47,9 +47,13 @@ if st.button("문제 생성"):
         # LLM을 사용하여 문제 생성
         #response = llm(prompt.format_messages(text=full_text))
         response = llm.invoke(prompt.format(text=full_text))
-
+        # cleaned_string = response.content.replace('json', '', 1).strip()
+        cleaned_string = response.content.replace('```', '').replace('json', '', 1).strip()
+        #st.text("lee")
+        # st.text(cleaned_string)
+        
         # JSON 파싱
-        questions_json = json.loads(response.content)
+        questions_json = json.loads(cleaned_string)
         
         # 결과 표시
         st.json(questions_json)
@@ -62,3 +66,5 @@ if st.button("문제 생성"):
                 st.write(option)
             st.write(f"정답: {q['correct_answer']}")
             st.write("---")
+
+        

@@ -267,3 +267,21 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import CharacterTextSplitter
 또 질문과 정답을 json 으로 보여주는 것도 만들어줘
+
+# JSON 파싱
+        questions_json = json.loads(response.content)
+        
+        # 결과 표시
+        st.json(questions_json)
+        
+        # 문제 및 선택지 표시
+        for i, q in enumerate(questions_json["questions"], 1):
+            st.subheader(f"문제 {i}")
+            st.write(q["question"])
+            for option in q["options"]:
+                st.write(option)
+            st.write(f"정답: {q['correct_answer']}")
+            st.write("---")
+			
+			
+			
