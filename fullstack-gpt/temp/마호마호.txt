@@ -229,5 +229,9 @@ def embed_file(file):
     return retriever
 
 
+langchain에서 OllamaEmbeddings, ChatOllama, FAISS 사용한 예제를 만들어줘.
+model은 "mistral:latest"를 사용하고 싶어.
 
+문서를 외부 txt 파일에서 읽어서 사용을 하고 싶어.
+파일 위치는 ./files/chapter_one.txt
 
