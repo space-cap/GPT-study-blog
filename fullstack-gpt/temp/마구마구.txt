@@ -205,3 +205,6 @@ r"^(.*\/blog\/).*",
 
 
 .streamlit
+
+pip install faiss-cpu
+

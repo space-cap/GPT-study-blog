@@ -78,11 +78,12 @@ def load_website(url):
     )
     loader = SitemapLoader(
         url,
+        verify_ssl=False,
         parsing_function=parse_page,
     )
     loader.requests_per_second = 2
     docs = loader.load_and_split(text_splitter=splitter)
-    vector_store = FAISS.from_documents(docs, GoogleGenerativeAIEmbeddings())
+    vector_store = FAISS.from_documents(docs, GoogleGenerativeAIEmbeddings(model="models/embedding-001"))
     return vector_store.as_retriever()
 
 
