@@ -204,3 +204,4 @@ regular expression:
 r"^(.*\/blog\/).*",
 
 
+.streamlit
