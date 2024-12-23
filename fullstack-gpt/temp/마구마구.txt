@@ -193,4 +193,14 @@ playwright install
 
 pip install html2text
 
+https://openai.com/sitemap.xml
+https://deepmind.google/sitemap.xml
+https://www.waikato.ac.nz/sitemap.xml
+
+해당 키워드만 제외하고 긁어오는 정규식
+r"^(?!.*\/blog\/).*",
+
+regular expression:
+r"^(.*\/blog\/).*",
+
 
