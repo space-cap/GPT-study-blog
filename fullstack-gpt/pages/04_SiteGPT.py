@@ -4,7 +4,7 @@ import streamlit as st
 
 @st.cache_resource(show_spinner="Loading website...")
 def load_website(url):
-    loader = SitemapLoader(url)
+    loader = SitemapLoader(url, verify_ssl=False)
     loader.requests_per_second = 5
     docs = loader.load()
     return docs
