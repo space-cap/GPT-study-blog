@@ -181,3 +181,16 @@ https://jay-1234.streamlit.app/
 
 streamlit 출시한 다음에 다시 app launch 를 하려면 어떻게 해야 되나요?
 requirements.txt 파일을 변경했습니다.
+
+streamlit run Home.py
+
+https://openai.com/blog/introducing-gpts
+https://openai.com/index/introducing-gpts
+
+
+pip install playwright
+playwright install
+
+pip install html2text
+
+

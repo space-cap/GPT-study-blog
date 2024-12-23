@@ -297,5 +297,6 @@ Streamlit 에서 st.ballons 을 사용을 하려고 하는데 예제 코드를 �
 AzureChatOpenAI
 
 
+streamlit run Home.py
 
 
