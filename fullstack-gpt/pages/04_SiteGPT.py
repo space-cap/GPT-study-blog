@@ -2,14 +2,16 @@ from langchain.document_loaders import SitemapLoader
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores.faiss import FAISS
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.chat_models import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 import streamlit as st
 
-llm = ChatOpenAI(
+
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash", 
     temperature=0.1,
-)
+    )
 
 answers_prompt = ChatPromptTemplate.from_template(
     """
@@ -68,7 +70,7 @@ def parse_page(soup):
     )
 
 
-@st.cache_data(show_spinner="Loading website...")
+@st.cache_resource(show_spinner="Loading website...")
 def load_website(url):
     splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=1000,
@@ -80,7 +82,7 @@ def load_website(url):
     )
     loader.requests_per_second = 2
     docs = loader.load_and_split(text_splitter=splitter)
-    vector_store = FAISS.from_documents(docs, OpenAIEmbeddings())
+    vector_store = FAISS.from_documents(docs, GoogleGenerativeAIEmbeddings())
     return vector_store.as_retriever()
 
 
