@@ -76,20 +76,29 @@ def load_website(url):
         chunk_size=1000,
         chunk_overlap=200,
     )
-    loader = SitemapLoader(
-        url,
-        verify_ssl=False,
-        parsing_function=parse_page,
-    )
-    loader.requests_per_second = 2
-    docs = loader.load_and_split(text_splitter=splitter)
+    try:
+        loader = SitemapLoader(
+            url,
+            # filter_urls=[],  # 필요한 경우 URL 필터링을 위한 정규식 패턴 추가
+            parsing_function=parse_page,
+            requests_per_second=2,
+            # continue_on_failure=True,
+        )
+        
+        docs = loader.load()
+        
+        if not docs:
+            st.error("웹사이트에서 문서를 추출하지 못했습니다. URL을 확인하고 다시 시도해주세요.")
+            return None
+        
+        split_docs = splitter.split_documents(docs)
+        
+        vector_store = FAISS.from_documents(split_docs, GoogleGenerativeAIEmbeddings(model="models/embedding-001"))
+        return vector_store.as_retriever()
     
-    if not docs:
-        st.error("웹사이트에서 문서를 추출하지 못했습니다. URL을 확인하고 다시 시도해주세요.")
+    except Exception as e:
+        st.error(f"웹사이트 로딩 중 오류 발생: {str(e)}")
         return None
-
-    vector_store = FAISS.from_documents(docs, GoogleGenerativeAIEmbeddings(model="models/embedding-001"))
-    return vector_store.as_retriever()
 
 
 st.set_page_config(

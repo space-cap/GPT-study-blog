@@ -208,3 +208,4 @@ r"^(.*\/blog\/).*",
 
 pip install faiss-cpu
 
+pip install -U langchain-community
