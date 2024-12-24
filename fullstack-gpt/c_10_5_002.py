@@ -2,14 +2,29 @@ import os
 from langchain_community.document_loaders import SitemapLoader
 from langchain_community.document_transformers import BeautifulSoupTransformer
 
-# USER_AGENT 환경 변수 설정
-os.environ['USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+
+def parse_page(soup):
+    header = soup.find("header")
+    footer = soup.find("footer")
+    if header:
+        header.decompose()
+    if footer:
+        footer.decompose()
+    return (
+        str(soup.get_text())
+        .replace("\n", " ")
+        .replace("\xa0", " ")
+        .replace("CloseSearch Submit Blog", "")
+    )
+
 
 # SitemapLoader 초기화
 loader = SitemapLoader(
     "https://developers.cloudflare.com/sitemap-0.xml",
-    filter_urls=["ai-gateway"],
-    parsing_function=BeautifulSoupTransformer().transform_documents
+    filter_urls=[
+            r"^(.*\/ai-gateway\/).*",
+        ],
+    parsing_function=parse_page,
 )
 loader.requests_per_second = 2
 

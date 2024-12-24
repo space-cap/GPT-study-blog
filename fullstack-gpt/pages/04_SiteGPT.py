@@ -116,18 +116,24 @@ def parse_page(soup):
     )
 
 
-@st.cache_data(show_spinner="Loading website...")
+@st.cache_resource(show_spinner="Loading website...")
 def load_website(url):
     splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=1000,
         chunk_overlap=200,
     )
+    st.write(url)
     loader = SitemapLoader(
         url,
+        filter_urls=[
+            r"^(.*\/ai-gateway\/).*",
+        ],
         parsing_function=parse_page,
     )
+    st.write(loader)
     loader.requests_per_second = 2
     docs = loader.load_and_split(text_splitter=splitter)
+    st.write(docs)
     vector_store = FAISS.from_documents(docs, GoogleGenerativeAIEmbeddings(model="models/embedding-001"))
     return vector_store.as_retriever()
 

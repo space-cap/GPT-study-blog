@@ -211,3 +211,24 @@ pip install faiss-cpu
 pip install -U langchain-community
 
 streamlit run Home.py
+
+
+USER_AGENT environment variable not set, consider setting it to identify your requests.
+
+USER_AGENT
+
+https://developers.cloudflare.com/sitemap-0.xml
+
+
+langchain, SitemapLoader 를 사용을 해서
+https://developers.cloudflare.com/sitemap-0.xml 에서 ai-gateway 만 가지고 오고 싶다.
+그런데 
+USER_AGENT environment variable not set, consider setting it to identify your requests.
+오류가 발생이 되었어.
+원인가 해결 방법을 알려줘. 그리고 코드도 만들어줘
+
+
+
+
+
+
