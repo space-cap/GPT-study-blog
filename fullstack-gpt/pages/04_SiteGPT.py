@@ -83,6 +83,11 @@ def load_website(url):
     )
     loader.requests_per_second = 2
     docs = loader.load_and_split(text_splitter=splitter)
+    
+    if not docs:
+        st.error("웹사이트에서 문서를 추출하지 못했습니다. URL을 확인하고 다시 시도해주세요.")
+        return None
+
     vector_store = FAISS.from_documents(docs, GoogleGenerativeAIEmbeddings(model="models/embedding-001"))
     return vector_store.as_retriever()
 
@@ -117,10 +122,12 @@ if url:
             st.error("Please write down a Sitemap URL.")
     else:
         retriever = load_website(url)
+        if not retriever:
+            st.error("not retriever")
+        else:
+            chain = {
+                "docs": retriever,
+                "question": RunnablePassthrough(),
+            } | RunnableLambda(get_answers)
 
-        chain = {
-            "docs": retriever,
-            "question": RunnablePassthrough(),
-        } | RunnableLambda(get_answers)
-
-        chain.invoke("What is the pricing of GPT-4 Turbo with vision.")
+            chain.invoke("What is the pricing of GPT-4 Turbo with vision.")
