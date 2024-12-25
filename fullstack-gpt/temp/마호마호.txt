@@ -311,3 +311,34 @@ https://www.youtube.com/watch?v=CWvOKHNeLMI
 Whisper Github Link:
 https://github.com/openai/whisper
 
+
+whisper
+
+pip install -U openai-whisper
+
+
+C:\ffmpeg\bin
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
