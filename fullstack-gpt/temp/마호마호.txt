@@ -305,3 +305,9 @@ GOOGLE_API_KEY = <YOUR_API_KEY_HERE>
 GOOGLE_API_KEY = "your_api_key_here"
 
 
+Nico's example Video Link :
+https://www.youtube.com/watch?v=CWvOKHNeLMI
+
+Whisper Github Link:
+https://github.com/openai/whisper
+
