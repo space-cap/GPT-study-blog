@@ -320,10 +320,12 @@ pip install -U openai-whisper
 C:\ffmpeg\bin
 
 
+pip install ffmpeg-python
+
+podcast
 
 
-
-
+ffmpeg -i files/podcast.mp4 -vn files/audio.mp3
 
 
 
