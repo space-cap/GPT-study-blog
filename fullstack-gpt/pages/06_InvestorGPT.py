@@ -91,7 +91,8 @@ class CompanyStockPerformanceTool(BaseTool):
         r = requests.get(
             f"https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol={symbol}&apikey={alpha_vantage_api_key}"
         )
-        return r.json()
+        response = r.json()
+        return list(response["Weekly Time Series"].items())[:200]
 
 
 agent = initialize_agent(
