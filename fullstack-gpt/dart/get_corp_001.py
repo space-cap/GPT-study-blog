@@ -2,7 +2,7 @@
 회사 정보를 가지고 와서
 사업 보고서 가지고 오기
 
-
+안 된다.
 '''
 
 
@@ -87,6 +87,8 @@ update_corp_list()
 
 # 삼성전자 정보 가져오기
 company_info = get_corp_info('삼성전자')
+#corp_list = dart.get_corp_list()
+#corp = corp_list.find_by_corp_code(company_info['corp_code'])
 
 if company_info:
     # dart-fss 객체 생성
