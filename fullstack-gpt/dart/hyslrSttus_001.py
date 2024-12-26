@@ -86,24 +86,17 @@ initialize_db()
 update_corp_list()
 
 # 삼성전자 정보 가져오기
-company_info = get_corp_info('삼성전자')
-#corp_list = dart.get_corp_list()
-#corp = corp_list.find_by_corp_code(company_info['corp_code'])
+company_info = get_corp_info('한중엔시에스')
 
 if company_info:
+    print(company_info['corp_code'])
     # dart-fss 객체 생성
-    corp = dart.get_corp(company_info['corp_code'])
-
-
-
-    # 최근 사업보고서 가져오기
-    reports = corp.extract_fs(bgn_de='20240101')
+    reports = dart.api.info.hyslr_sttus(company_info['corp_code'], '2023', '11011')
 
     # 최대주주 정보 출력
     if reports:
-        major_shareholders = reports[0]['주주에 관한 사항']['최대주주 및 특수관계인의 주식소유 현황']
         print("최대주주 정보:")
-        print(major_shareholders)
+        print(reports)
     else:
         print("최대주주 정보를 찾을 수 없습니다.")
 else:
