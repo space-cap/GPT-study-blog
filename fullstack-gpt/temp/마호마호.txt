@@ -328,6 +328,9 @@ podcast
 ffmpeg -i files/podcast.mp4 -vn files/audio.mp3
 
 
+pip install dart-fss
+pip install --upgrade fake-useragent
+
 
 
 
