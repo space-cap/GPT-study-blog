@@ -82,7 +82,7 @@ initialize_db()
 update_corp_list()
 
 # 삼성전자 검색
-samsung = search_corp_by_name('삼성전자')
+samsung = search_corp_by_name('한중엔시에스')
 if samsung:
     print(f"회사명: {samsung['corp_name']}")
     print(f"종목코드: {samsung['stock_code']}")

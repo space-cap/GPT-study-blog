@@ -54,7 +54,7 @@ def print_major_stock_holdings(holdings):
 # 메인 실행 부분
 if __name__ == "__main__":
     api_key = dart_api_key  # 발급받은 API 키를 입력하세요
-    corp_code = "00126380"  # 삼성전자의 고유번호 (예시)
+    corp_code = "00474588"  # 고유번호 (예시)
 
     holdings = get_major_stock_holdings(api_key, corp_code)
     print_major_stock_holdings(holdings)
