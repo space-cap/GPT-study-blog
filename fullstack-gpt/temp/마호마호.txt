@@ -340,9 +340,10 @@ https://arxiv.org/pdf/2210.03629.pdf
 
 pip install -U duckduckgo-search
 
+pip install yfinance
 
 
-
+https://python.langchain.com/docs/integrations/tools/
 
 
 
