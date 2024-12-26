@@ -345,6 +345,7 @@ pip install yfinance
 
 https://python.langchain.com/docs/integrations/tools/
 
+pip install -U duckduckgo_search
 
 
 
