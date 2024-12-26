@@ -338,6 +338,8 @@ pip install --upgrade dart-fss
 
 https://arxiv.org/pdf/2210.03629.pdf
 
+pip install -U duckduckgo-search
+
 
 
 
