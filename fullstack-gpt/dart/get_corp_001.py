@@ -1,3 +1,11 @@
+'''
+회사 정보를 가지고 와서
+사업 보고서 가지고 오기
+
+
+'''
+
+
 import dart_fss as dart
 import os
 import sqlite3
@@ -42,7 +50,7 @@ def update_corp_list():
     if not last_update or datetime.now() - last_update > timedelta(days=7):
         print("기업 목록을 업데이트합니다.")
         corp_list = dart.get_corp_list()
-        
+
         cursor.execute("DELETE FROM corp_list")
 
         for corp in corp_list:
@@ -58,21 +66,17 @@ def update_corp_list():
 
     conn.close()
 
-def search_corp_by_name(corp_name):
+def get_corp_info(corp_name):
     conn = sqlite3.connect('corp_list.db')
     cursor = conn.cursor()
 
-    cursor.execute("SELECT corp_code, corp_name, stock_code FROM corp_list WHERE corp_name = ?", (corp_name,))
+    cursor.execute("SELECT corp_code, stock_code FROM corp_list WHERE corp_name = ?", (corp_name,))
     result = cursor.fetchone()
 
     conn.close()
 
     if result:
-        return {
-            'corp_code': result[0],
-            'corp_name': result[1],
-            'stock_code': result[2]
-        }
+        return {'corp_code': result[0], 'stock_code': result[1]}
     else:
         print(f"기업 '{corp_name}'을(를) 찾을 수 없습니다.")
         return None
@@ -81,10 +85,25 @@ def search_corp_by_name(corp_name):
 initialize_db()
 update_corp_list()
 
-# 삼성전자 검색
-samsung = search_corp_by_name('한중엔시에스')
-if samsung:
-    print(f"회사명: {samsung['corp_name']}")
-    print(f"종목코드: {samsung['stock_code']}")
-    print(f"고유번호: {samsung['corp_code']}")
+# 삼성전자 정보 가져오기
+company_info = get_corp_info('삼성전자')
+
+if company_info:
+    # dart-fss 객체 생성
+    corp = dart.get_corp(company_info['corp_code'])
+
+    # 최근 사업보고서 가져오기
+    reports = corp.extract_fs(bgn_de='20240101')
+
+    # 최대주주 정보 출력
+    if reports:
+        major_shareholders = reports[0]['주주에 관한 사항']['최대주주 및 특수관계인의 주식소유 현황']
+        print("최대주주 정보:")
+        print(major_shareholders)
+    else:
+        print("최대주주 정보를 찾을 수 없습니다.")
+else:
+    print("기업 정보를 찾을 수 없습니다.")
+
+
 
