@@ -354,10 +354,20 @@ https://python.langchain.com/docs/assistants/overview/
 
 https://platform.openai.com/docs/assistants/overview
 
+pip install -U yfinance openai
 
 
 
+import openai as client
 
+assistant = client.beta.assistants.create(
+    name="Investor Assistant",
+    instructions="You help users do research on publicly traded companies and you help users decide if they should buy the stock or not.",
+    model="gpt-4o-mini",
+    tools=functions,
+)
+
+위 코드를 google genai 버전으로 변경 할 수 있어.
 
 
 
