@@ -370,9 +370,10 @@ assistant = client.beta.assistants.create(
 위 코드를 google genai 버전으로 변경 할 수 있어.
 
 
+pip install grpcio
 
 
-
+https://platform.openai.com/assistants
 
 
 
