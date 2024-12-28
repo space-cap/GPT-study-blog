@@ -347,6 +347,19 @@ https://python.langchain.com/docs/integrations/tools/
 
 pip install -U duckduckgo_search
 
+https://duckduckgo.com/
+
+
+https://python.langchain.com/docs/assistants/overview/
+
+https://platform.openai.com/docs/assistants/overview
+
+
+
+
+
+
+
 
 
 
