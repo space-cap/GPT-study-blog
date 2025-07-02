@@ -1,0 +1,6 @@
+venv/
+.env
+.cache/
+.streamlit/
+.vscode/
+chroma_db/
