@@ -1,25 +1,36 @@
-# 1. OpenAI 모델을 사용하는 LLM(대형 언어 모델) 객체를 임포트
-from langchain.llms import OpenAI
-
-# 2. LLMChain 클래스: 프롬프트 + LLM 실행을 하나의 체인으로 묶는 객체
+# 1. 필요한 모듈 임포트
+from langchain_openai import OpenAI
 from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+import os
+from dotenv import load_dotenv
 
-# 3. OpenAI LLM 객체 생성
-# 기본적으로 OpenAI의 ChatGPT 또는 GPT-3.5/4 엔진을 사용
-llm = OpenAI()
+# 환경변수 로드
+load_dotenv()
 
-# 4. 앞서 만든 PromptTemplate과 LLM을 조합해 LLMChain 생성
-prompt = "당신은 {job}입니다. 오늘 할 일은?"
-chain = LLMChain(llm=llm, prompt=prompt)
+# 2. OpenAI LLM 객체 생성
+llm = OpenAI(
+    model="gpt-4o-mini",
+    temperature=0.5,
+    max_tokens=100,
+    openai_api_key=os.getenv("OPENAI_API_KEY"),
+)
 
-# 5. 체인 실행: run() 함수에 dict 형태로 변수 주입
-# 여기서는 job="개발자"라는 값을 {job}에 넣어 실행
-output = chain.run({"job": "개발자"})
+# 3. PromptTemplate 생성
+prompt_template = PromptTemplate(
+    input_variables=["job"], template="당신은 {job}입니다. 오늘 할 일은?"
+)
 
-# 6. 결과
-# 내부적으로 다음 프롬프트가 생성됨:
-# → "당신은 개발자입니다. 오늘 할 일은?"
-# 이 프롬프트가 LLM에 전달되고, 모델의 응답이 output 변수에 저장됨
-print("LLMChain 실행 완료!")
-print(f"생성된 프롬프트: {output}")
+# 4. LLMChain 생성
+chain = LLMChain(llm=llm, prompt=prompt_template)
 
+# 5. 체인 실행 (invoke 사용)
+try:
+    result = chain.invoke({"job": "개발자"})
+    output = result.get("text", "응답을 받지 못했습니다.")
+
+    print("LLMChain 실행 완료!")
+    print(f"생성된 응답: {output}")
+
+except Exception as e:
+    print(f"오류 발생: {e}")
