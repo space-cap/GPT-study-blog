@@ -31,7 +31,7 @@ print(f"완성된 프롬프트: '{formatted_prompt}'")
 chain = prompt_template | llm
 
 # 실행
-output = chain.invoke({"job": "개발자"})
+output = chain.invoke(input_data)
 
 print("현대적인 체인 실행 완료!")
 print(f"생성된 응답: {output}")
