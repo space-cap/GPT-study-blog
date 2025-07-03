@@ -51,5 +51,5 @@ agent = initialize_agent(
 
 print("REAct 실행:")
 # result = agent.invoke({"input": "5에 2를 더하고, 서울 인구도 알려줘"})
-result = agent.invoke({"input": "5,2,3 더하고, 패캠 인구도 알려줘"})
+result = agent.invoke({"input": "5,2,3 더하고, 서울 인구도 알려줘"})
 print(result["output"])
