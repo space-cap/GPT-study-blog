@@ -1,9 +1,17 @@
+from abc import ABC, abstractmethod
+from typing import List, Dict, Any
+
+class 깨닫다:
+    def __init__(self):
+        print("깨닫다")
+
+
 class 무의식:
     def __init__(self):
         print("무의식")
 
 
-class 의식:
+class 의식(깨닫다):
     def __init__(self):
         print("의식")
 
@@ -63,6 +71,26 @@ class 직관(심리):
         print("직관")
 
 
+class 정신기능(ABC):
+    @abstractmethod
+    def run(self, data: Any) -> Any:
+        pass
+
+
+class 인지기능(정신기능):
+    def __init__(self, 감각, 사고):
+        self._감각 = 감각
+        self._사고 = 사고
+
+    def run(self, 정보: str) -> Dict[str, Any]:
+        """정보를 받아들이고 처리"""
+        처리된_정보 = {
+            "name": "인지기능",
+            "result": "success",
+        }
+        return 처리된_정보
+
+
 class 정신:
     def __init__(self):
         # 정신 구조
@@ -76,6 +104,7 @@ class 정신:
         self._감정 = 감정(self._의식, self._무의식)
         self._감각 = 감각(self._의식)
         self._직관 = 직관(self._무의식, self._전의식)
+
         print("정신")
 
 
