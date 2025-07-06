@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
 
+
 class 깨닫다:
     def __init__(self):
         print("깨닫다")
@@ -84,11 +85,42 @@ class 인지기능(정신기능):
 
     def run(self, 정보: str) -> Dict[str, Any]:
         """정보를 받아들이고 처리"""
-        처리된_정보 = {
+        결과 = {
             "name": "인지기능",
+            "content": f"{정보} 바탕으로 실행한 결과는 llm",
             "result": "success",
         }
-        return 처리된_정보
+        return 결과
+
+
+class 판단기능(정신기능):
+    def __init__(self, 사고, 감정):
+        self._사고 = 사고
+        self._감정 = 감정
+
+    def 실행(self, 상황: str) -> Dict[str, Any]:
+        """상황을 분석하고 결정"""
+        결과 = {
+            "name": "판단기능",
+            "content": f"{상황} 바탕으로 실행한 결과는 llm",
+            "result": "success",
+        }
+        return 결과
+
+
+class 감정조절(정신기능):
+    def __init__(self, 감정, 의식):
+        self._감정 = 감정
+        self._의식 = 의식
+
+    def 실행(self, 감정상태: str) -> Dict[str, Any]:
+        """정서적 반응을 통제하고 관리"""
+        결과 = {
+            "name": "판단기능",
+            "content": f"{감정상태} 바탕으로 실행한 결과는 llm",
+            "result": "success",
+        }
+        return 결과
 
 
 class 정신:
