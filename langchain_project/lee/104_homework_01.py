@@ -145,5 +145,10 @@ class 정신:
 
         print("정신")
 
+        def 감정조절(self, 감정상태: str) -> Dict[str, Any]:
+            """정서적 반응을 통제하고 관리하는 능력"""
+            결과 = self._기능들["감정조절"].run(감정상태)
+            return 결과
+
 
 soul = 정신()
