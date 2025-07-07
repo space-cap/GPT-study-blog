@@ -90,7 +90,7 @@ if __name__ == "__main__":
     OUTPUT_PDF_FILE = "dental_salon_ebook_final.pdf"
 
     # 1. SVG 파일 다운로드 (기존과 동일)
-    download_svg_files(BASE_URL, START_PAGE, END_PAGE, SVG_DOWNLOAD_FOLDER)
+    # download_svg_files(BASE_URL, START_PAGE, END_PAGE, SVG_DOWNLOAD_FOLDER)
 
     # 2. 다운로드된 SVG 파일로 PDF 생성 (새롭고 안정적인 방법)
     create_pdf_from_svgs_robust(
