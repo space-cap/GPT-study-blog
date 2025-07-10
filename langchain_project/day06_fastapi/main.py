@@ -138,4 +138,4 @@ class ItemResponse(BaseModel):
 
 @app.post("/items/", response_model=ItemResponse)
 def create_item(item: ItemCreate):
-    return ItemResponse(**item.dict(), is_offer=True)
+    return ItemResponse(**item.model_dump(), is_offer=True)

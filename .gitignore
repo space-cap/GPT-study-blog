@@ -1,3 +1,4 @@
 *.mp3
 *.mp4
 /langchain_project/svg_downloads
+/langchain_project/day06_fastapi/__pycache__
