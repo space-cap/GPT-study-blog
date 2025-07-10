@@ -326,8 +326,23 @@ class UserCreate(BaseModel):
 # API 엔드포인트
 @app.post("/users/")
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = User(username=user.username, email=user.email)
+    db_user = UserDb(username=user.username, email=user.email)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
+from fastapi.testclient import TestClient
+
+client = TestClient(app)
+
+
+def test_read_main():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json() == {"Hello": "World"}
+
+
+def test_create_item():
+    response = client.post("/items/", json={"name": "Test Item", "price": 10.5})
+    assert response.status_code == 201
+    assert response.json()["name"] == "Test Item"
