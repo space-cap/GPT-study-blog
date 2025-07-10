@@ -52,11 +52,11 @@ def get_users(skip: int = 0, limit: int = 10):
 def get_user(user_id: int):
     return {"user_id": user_id}
 
-
+"""
 @app.post("/users/")
 def create_user(user: User):
     return {"message": "User created~~", "user": user}
-
+"""
 
 @app.put("/users/{user_id}")
 def update_user(user_id: int, user: User):
@@ -260,4 +260,74 @@ def get_api_key(api_key: str = Security(api_key_header)):
 def protected_route(api_key: str = Depends(get_api_key)):
     return {"message": "This is a protected route"}
 
+"""
+JWT란?
+JWT(JSON Web Token)는 당사자 간에 정보를 JSON 객체로 안전하게 전송하기 위한 개방형 표준(RFC 7519)입니다. 
+주로 인증과 정보 교환에 사용됩니다.
+"""
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import jwt
 
+security = HTTPBearer()
+
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)):
+    try:
+        payload = jwt.decode(credentials.credentials, "secret", algorithms=["HS256"])
+        return payload
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=403, detail="Invalid token")
+
+
+@app.get("/protected/")
+def protected_route(current_user: dict = Depends(verify_token)):
+    return {"message": f"Hello {current_user.get('username')}"}
+
+
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
+
+DATABASE_URL = "sqlite:///./test.db"
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+
+# 모델 정의
+class UserDb(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
+
+
+Base.metadata.create_all(bind=engine)
+
+
+# 의존성
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+# Pydantic 모델들
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+
+
+# API 엔드포인트
+@app.post("/users/")
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = User(username=user.username, email=user.email)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
