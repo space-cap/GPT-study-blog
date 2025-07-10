@@ -135,7 +135,129 @@ class ItemResponse(BaseModel):
     price: float
     is_offer: bool = False
 
+"""
+버전별 차이점
+Pydantic v1
+dict() 메서드 사용 가능
+json() 메서드로 JSON 직렬화
+
+Pydantic v2 (현재 권장)
+model_dump(): 딕셔너리로 변환
+model_dump_json(): JSON 문자열로 변환
+model_copy(): 모델 복사
+"""
 
 @app.post("/items/", response_model=ItemResponse)
 def create_item(item: ItemCreate):
     return ItemResponse(**item.model_dump(), is_offer=True)
+
+from fastapi import status
+
+
+@app.post("/items/", status_code=status.HTTP_201_CREATED)
+def create_item(item: ItemCreate):
+    return item
+
+
+@app.delete("/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_item(item_id: int):
+    return None
+
+from fastapi import HTTPException
+
+
+@app.get("/items/{item_id}")
+def read_item(item_id: int):
+    if item_id == 0:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return {"item_id": item_id}
+
+
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+
+class CustomException(Exception):
+    def __init__(self, name: str):
+        self.name = name
+
+
+@app.exception_handler(CustomException)
+async def custom_exception_handler(request: Request, exc: CustomException):
+    return JSONResponse(
+        status_code=418, content={"message": f"Oops! {exc.name} did something wrong."}
+    )
+
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 실제 운영에서는 특정 도메인만 허용
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+import time
+from fastapi import Request
+
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    response.headers["lee-Time"] = str(process_time)
+    return response
+
+
+from fastapi import Depends
+
+
+def common_parameters(q: Optional[str] = None, skip: int = 0, limit: int = 100):
+    return {"q": q, "skip": skip, "limit": limit}
+
+
+@app.get("/items/")
+def read_items(commons: dict = Depends(common_parameters)):
+    return commons
+
+
+@app.get("/users/")
+def read_users(commons: dict = Depends(common_parameters)):
+    return commons
+
+"""
+클래스 기반 의존성
+"""
+class CommonQueryParams:
+    def __init__(self, q: Optional[str] = None, skip: int = 0, limit: int = 100):
+        self.q = q
+        self.skip = skip
+        self.limit = limit
+
+
+@app.get("/items/")
+def read_items(commons: CommonQueryParams = Depends(CommonQueryParams)):
+    return commons
+
+
+from fastapi import Security
+from fastapi.security import APIKeyHeader
+
+API_KEY = "your-secret-api-key"
+api_key_header = APIKeyHeader(name="X-API-Key")
+
+
+def get_api_key(api_key: str = Security(api_key_header)):
+    if api_key != API_KEY:
+        raise HTTPException(status_code=403, detail="Invalid API Key")
+    return api_key
+
+
+@app.get("/protected/")
+def protected_route(api_key: str = Depends(get_api_key)):
+    return {"message": "This is a protected route"}
+
+
