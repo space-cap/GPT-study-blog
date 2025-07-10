@@ -2,3 +2,4 @@
 *.mp4
 /langchain_project/svg_downloads
 /langchain_project/day06_fastapi/__pycache__
+/langchain_project/lee_simple_fastapi/app/__pycache__
