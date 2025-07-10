@@ -346,3 +346,28 @@ def test_create_item():
     response = client.post("/items/", json={"name": "Test Item", "price": 10.5})
     assert response.status_code == 201
     assert response.json()["name"] == "Test Item"
+
+
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+@app.get("/items/{item_id}")
+def read_item(item_id: int):
+    logger.info(f"Reading item {item_id}")
+    return {"item_id": item_id}
+
+
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    database_url: str = "sqlite:///./test.db"
+    secret_key: str = "your-secret-key"
+
+    class Config:
+        env_file = ".env"
+
+
+settings = Settings()
