@@ -1,5 +1,5 @@
 from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.document_loaders import TextLoader
 
@@ -14,7 +14,12 @@ load_dotenv()
 
 # 1. 임베딩 모델 초기화
 # OpenAI의 text-embedding-ada-002 모델 사용
-embeddings = OpenAIEmbeddings()
+# 기본 1536차원 : 1536 × 4바이트 = 6.1KB per 문서
+# embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+
+# 1024차원으로 축소: 512 × 4바이트 = 2.0KB per 문서 (약 67% 절약)
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small", dimensions=1024)
+
 
 # 2. 샘플 텍스트 데이터 준비
 sample_texts = [
