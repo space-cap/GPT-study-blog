@@ -8,7 +8,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain.evaluation import load_evaluator
 import matplotlib.pyplot as plt
-import pandas as pd
+import pandas as pd 
 
 # OpenAI API 키 설정 (환경변수 또는 직접 입력)
 import os
