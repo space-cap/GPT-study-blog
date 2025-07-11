@@ -204,6 +204,15 @@ class ChunkSizeOptimizer:
         Args:
             results_df: 실험 결과 DataFrame
         """
+
+        # 한글 폰트 설정
+        plt.rcParams['font.family'] = 'Malgun Gothic'  # Windows
+        # plt.rcParams['font.family'] = 'AppleGothic'  # macOS
+        # plt.rcParams['font.family'] = 'NanumGothic'  # 나눔고딕이 설치된 경우
+
+        # 마이너스 기호 깨짐 방지
+        plt.rcParams['axes.unicode_minus'] = False
+
         fig, axes = plt.subplots(2, 2, figsize=(15, 12))
 
         # 1. 청크 크기별 관련성 점수
