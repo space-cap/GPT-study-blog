@@ -1,6 +1,12 @@
 # saju_chatbot/chatbot/graph.py
 
 from langgraph.graph import StateGraph, END
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
 from chatbot.state import AgentState
 from chatbot.nodes import (
     call_llm,

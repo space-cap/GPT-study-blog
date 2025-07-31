@@ -104,7 +104,6 @@ class ChromaManager:
 
         if docs_to_add:
             self.vectorstore.add_documents(docs_to_add)
-            self.vectorstore.persist()  # 변경 사항을 디스크에 저장
             print(f"Added {len(docs_to_add)} documents to ChromaDB.")
         else:
             print("No documents to add to ChromaDB.")

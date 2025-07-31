@@ -3,6 +3,7 @@
 import mysql.connector
 from mysql.connector import Error
 from config import MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB
+from datetime import datetime
 
 
 class MySQLManager:
