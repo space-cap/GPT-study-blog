@@ -79,9 +79,19 @@ def calculate_and_analyze_saju(
         # 2. 사주 분석
         analyzed_info = saju_analyzer.analyze_saju(saju_info)
 
-        return {"saju_info": saju_info, "analyzed_info": analyzed_info}
+        # 직렬화 가능한 형태로 변환
+        result = {
+            "saju_info": make_serializable(saju_info),
+            "analyzed_info": make_serializable(analyzed_info),
+        }
+
+        return serialize_safely(result)
     except Exception as e:
-        return {"error": str(e), "message": "사주 계산 및 분석 중 오류가 발생했습니다."}
+        error_result = {
+            "error": True,
+            "message": f"사주 계산 및 분석 중 오류가 발생했습니다: {str(e)}",
+        }
+        return serialize_safely(error_result)
 
 
 @tool
@@ -131,7 +141,7 @@ def save_user_session_data(
     birth_hour: int = None,
     is_lunar: bool = None,
     is_leap_month: bool = None,
-) -> dict:
+) -> str:
     """
     사용자의 세션 데이터를 MySQL에 저장하거나 업데이트합니다.
     주로 생년월일시와 같은 사주 계산에 필요한 정보를 저장하는 데 사용됩니다.
@@ -148,15 +158,17 @@ def save_user_session_data(
         mysql_manager.save_user_session(
             session_id, user_id, birth_datetime, is_lunar, is_leap_month
         )
-        return {
+        result = {
             "status": "success",
             "message": "사용자 세션 정보가 성공적으로 저장되었습니다.",
         }
+        return serialize_safely(result)
     except Exception as e:
-        return {
+        error_result = {
             "status": "error",
-            "message": f"사용자 세션 정보 저장 중 오류 발생: {e}",
+            "message": f"사용자 세션 정보 저장 중 오류 발생: {str(e)}",
         }
+        return serialize_safely(error_result)
 
 
 @tool
@@ -169,21 +181,22 @@ def get_user_session_data(session_id: str) -> dict:
     try:
         session_data = mysql_manager.get_user_session(session_id)
         if session_data:
-            # datetime 객체를 직렬화 가능한 형태로 변환 (예: ISO 포맷 문자열)
-            if "birth_datetime" in session_data and isinstance(
-                session_data["birth_datetime"], datetime
-            ):
-                session_data["birth_datetime"] = session_data[
-                    "birth_datetime"
-                ].isoformat()
-            return {"status": "success", "data": session_data}
+            # 안전한 직렬화 처리
+            serializable_data = make_serializable(session_data)
+            result = {"status": "success", "data": serializable_data}
         else:
-            return {
+            result = {
                 "status": "not_found",
                 "message": f"세션 ID {session_id}에 해당하는 데이터가 없습니다.",
             }
+
+        return serialize_safely(result)
     except Exception as e:
-        return {"status": "error", "message": f"세션 데이터 조회 중 오류 발생: {e}"}
+        error_result = {
+            "status": "error",
+            "message": f"세션 데이터 조회 중 오류 발생: {str(e)}",
+        }
+        return serialize_safely(error_result)
 
 
 # 모든 도구들을 리스트로 묶어 LangGraph에서 사용
