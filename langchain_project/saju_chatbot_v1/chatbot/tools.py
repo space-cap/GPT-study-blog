@@ -10,6 +10,38 @@ from database.chroma_manager import ChromaManager
 from langchain_openai import ChatOpenAI
 from config import OPENAI_API_KEY  # OpenAI API 키 로드
 
+import json
+from typing import Any
+
+
+def serialize_safely(obj: Any) -> str:
+    """객체를 안전하게 JSON 문자열로 직렬화합니다."""
+    if hasattr(obj, "model_dump"):  # Pydantic v2
+        return json.dumps(obj.model_dump(), ensure_ascii=False, default=str)
+    elif hasattr(obj, "dict"):  # Pydantic v1
+        return json.dumps(obj.dict(), ensure_ascii=False, default=str)
+    elif isinstance(obj, dict):
+        return json.dumps(obj, ensure_ascii=False, default=str)
+    else:
+        return json.dumps(str(obj), ensure_ascii=False)
+
+
+def make_serializable(obj: Any) -> Any:
+    """객체를 직렬화 가능한 형태로 변환합니다."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    elif hasattr(obj, "model_dump"):
+        return obj.model_dump()
+    elif hasattr(obj, "dict"):
+        return obj.dict()
+    elif isinstance(obj, dict):
+        return {k: make_serializable(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [make_serializable(item) for item in obj]
+    else:
+        return obj
+
+
 # 전역 인스턴스 (어플리케이션 시작 시 한 번만 초기화)
 saju_calculator = SajuCalculator()
 saju_analyzer = SajuAnalyzer()
