@@ -23,11 +23,21 @@ def call_llm(state: AgentState):
     """
     messages = state["messages"]
 
-    # 세션 데이터에서 이전 대화 기록 가져와서 LLM에게 전달 (최신 메시지 우선)
-    # (주의: LangGraph의 add_messages는 자동으로 이전 대화를 포함하므로 추가적인 기록 로딩은 필요 없을 수 있음)
+    # 디버깅을 위한 메시지 타입 확인
+    print(f"Messages count: {len(messages)}")
+    for i, msg in enumerate(messages):
+        print(
+            f"Message {i}: type={type(msg)}, content_type={type(getattr(msg, 'content', None))}"
+        )
 
-    response = llm.invoke(messages)
-    return {"messages": [response]}
+    try:
+        response = llm.invoke(messages)
+        return {"messages": [response]}
+    except Exception as e:
+        print(f"Error in call_llm: {e}")
+        return {
+            "messages": [AIMessage(content=f"LLM 호출 중 오류가 발생했습니다: {e}")]
+        }
 
 
 def route_decision(state: AgentState):
