@@ -19,17 +19,7 @@ class SajuInterpreter:
     def _load_terms(self, path):
         if not os.path.exists(path):
             print(f"Error: saju_terms.json not found at {path}. Please create it.")
-            # 예시 데이터 생성
-            example_data = {
-                "천간": {"甲": "갑목", "乙": "을목", ...},
-                "지지": {"子": "자수", "丑": "축토", ...},
-                "오행": {"木": "나무", "火": "불", ...},
-                "십성": {"비견": "나와 같은 기운", "겁재": "경쟁의 기운", ...},
-                "신살": {"도화살": "매력과 인기의 기운", "역마살": "이동과 변화의 기운", ...}
-            }
-            with open(path, 'w', encoding='utf-8') as f:
-                json.dump(example_data, f, ensure_ascii=False, indent=4)
-            return example_data
+            return {}
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
 

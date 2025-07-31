@@ -1,0 +1,10 @@
+langchain
+langchain-openai
+langchain-chroma
+langchain-huggingface
+langgraph
+mysql-connector-python  # 또는 pymysql
+python-dotenv
+fakeredis # 세션 관리 등에 사용될 수 있음
+uvicorn
+fastapi # 또는 streamlit
