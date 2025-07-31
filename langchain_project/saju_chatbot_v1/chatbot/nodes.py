@@ -14,7 +14,7 @@ from datetime import datetime
 import json
 
 # LLM 초기화 (Node 내부에서 호출하기 위함)
-llm = ChatOpenAI(model="gpt-4o", temperature=0.7, api_key=OPENAI_API_KEY, tools=tools)
+llm = ChatOpenAI(model="gpt-4o", temperature=0.7, api_key=OPENAI_API_KEY)
 
 
 def call_llm(state: AgentState):

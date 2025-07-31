@@ -16,14 +16,21 @@ from typing import Any
 
 def serialize_safely(obj: Any) -> str:
     """객체를 안전하게 JSON 문자열로 직렬화합니다."""
-    if hasattr(obj, "model_dump"):  # Pydantic v2
-        return json.dumps(obj.model_dump(), ensure_ascii=False, default=str)
-    elif hasattr(obj, "dict"):  # Pydantic v1
-        return json.dumps(obj.dict(), ensure_ascii=False, default=str)
-    elif isinstance(obj, dict):
-        return json.dumps(obj, ensure_ascii=False, default=str)
-    else:
-        return json.dumps(str(obj), ensure_ascii=False)
+    try:
+        if hasattr(obj, "model_dump"):  # Pydantic v2
+            return json.dumps(obj.model_dump(), ensure_ascii=False, default=str)
+        elif hasattr(obj, "dict"):  # Pydantic v1
+            return json.dumps(obj.dict(), ensure_ascii=False, default=str)
+        elif isinstance(obj, dict):
+            return json.dumps(obj, ensure_ascii=False, default=str)
+        else:
+            return json.dumps(str(obj), ensure_ascii=False)
+    except Exception as e:
+        # 직렬화 실패 시 안전한 fallback
+        return json.dumps(
+            {"error": True, "message": f"직렬화 오류: {str(e)}"},
+            ensure_ascii=False,
+        )
 
 
 def make_serializable(obj: Any) -> Any:
@@ -61,7 +68,7 @@ def calculate_and_analyze_saju(
     birth_hour: int,
     is_lunar: bool = False,
     is_leap_month: bool = False,
-) -> dict:
+) -> str:
     """
     주어진 생년월일시 (양력 또는 음력)를 바탕으로 사주팔자를 계산하고, 오행, 십성, 신살 등을 분석합니다.
     입력: birth_year (년), birth_month (월), birth_day (일), birth_hour (시), is_lunar (음력 여부, 기본값 False), is_leap_month (윤달 여부, 기본값 False)
@@ -172,7 +179,7 @@ def save_user_session_data(
 
 
 @tool
-def get_user_session_data(session_id: str) -> dict:
+def get_user_session_data(session_id: str) -> str:
     """
     MySQL에서 주어진 세션 ID에 해당하는 사용자 세션 데이터를 조회합니다.
     입력: session_id
