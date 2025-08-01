@@ -31,7 +31,8 @@ def call_llm(state: AgentState):
         )
 
     try:
-        response = llm.invoke(messages)
+        llm_with_tools = llm.bind_tools(tools)
+        response = llm_with_tools.invoke(messages)
         return {"messages": [response]}
     except Exception as e:
         print(f"Error in call_llm: {e}")
@@ -74,9 +75,16 @@ def call_tool(state: AgentState):
             if selected_tool:
                 print(f"Calling tool: {tool_name} with args: {tool_args}")
                 result = selected_tool.invoke(tool_args)
-                print(f"Tool result: {result}")
+
+                # 🔧 개선: 안전한 문자열 변환
+                if isinstance(result, str):
+                    content = result
+                else:
+                    content = str(result)
+
+                print(f"Tool result: {content}")
                 tool_results.append(
-                    ToolMessage(content=str(result), tool_call_id=tool_call["id"])
+                    ToolMessage(content=content, tool_call_id=tool_call["id"])
                 )
             else:
                 tool_results.append(
@@ -141,7 +149,8 @@ def respond_to_user(state: AgentState):
             # tool_results를 바탕으로 LLM에게 다시 질의하여 최종 답변을 생성해야 합니다.
 
             # 현재 상태의 모든 메시지를 다시 LLM에게 전달하여 최종 사용자 응답 생성
-            final_llm_response = llm.invoke(state["messages"])
+            llm_with_tools = llm.bind_tools(tools)
+            final_llm_response = llm_with_tools.invoke(state["messages"])
             return {"messages": [final_llm_response]}
 
         except Exception as e:

@@ -102,7 +102,7 @@ def calculate_and_analyze_saju(
 
 
 @tool
-def get_saju_interpretation(analyzed_saju_info: dict, user_question: str = None) -> str:
+def get_saju_interpretation(analyzed_saju_info: dict = None, user_question: str = None) -> str:
     """
     분석된 사주 정보를 바탕으로 사용자에게 친절하고 상세한 사주 풀이를 제공합니다.
     추가적인 사용자 질문이 있다면 그에 대한 답변도 포함합니다.
@@ -110,6 +110,10 @@ def get_saju_interpretation(analyzed_saju_info: dict, user_question: str = None)
     출력: 사주 풀이 텍스트 (문자열)
     """
     try:
+        # 사주 정보가 없는 경우 처리
+        if not analyzed_saju_info:
+            return "사주 해석을 위해서는 먼저 생년월일시 정보가 필요합니다. 태어난 연도, 월, 일, 시간을 알려주세요."
+        
         # Interpreter는 이미 LLM을 가지고 있으므로 바로 호출
         interpretation = saju_interpreter.interpret_saju(
             analyzed_saju_info, user_question
