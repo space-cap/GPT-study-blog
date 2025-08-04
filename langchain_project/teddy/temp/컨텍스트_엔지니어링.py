@@ -15,7 +15,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 
-
+import shutil
 import os
 
 # API 키를 환경변수로 관리하기 위한 설정 파일
@@ -44,7 +44,8 @@ class ConversationState(TypedDict):
 
 
 class MemorySystem:
-    def __init__(self):
+
+    def __init__(self, reset_db: bool = False):
 
         self.user = os.getenv("DB_USER")
         self.password = os.getenv("DB_PASSWORD")
@@ -60,12 +61,20 @@ class MemorySystem:
             database="context_db",
         )
 
+        if reset_db:
+            # 기존 Chroma DB 삭제
+            if os.path.exists("./chroma_db"):
+                shutil.rmtree("./chroma_db")
+
         # 벡터 저장소 (Chroma)
         self.embeddings = HuggingFaceEmbeddings(
             model_name="sentence-transformers/all-MiniLM-L6-v2"
         )
+
         self.vector_store = Chroma(
-            embedding_function=self.embeddings, persist_directory="./chroma_db"
+            collection_name="context_384dim",  # 새로운 컬렉션명
+            embedding_function=self.embeddings,
+            persist_directory="./chroma_db",
         )
 
         self._setup_database()
@@ -429,6 +438,33 @@ class ContextEngineeringAgent:
         )
 
 
+# =============================================================================
+# 6. 사용 예시
+# =============================================================================
+
+
+def main():
+    # 시스템 초기화
+    agent = ContextEngineeringAgent()
+
+    print("컨텍스트 엔지니어링 에이전트 시작!")
+    print("종료하려면 'quit'을 입력하세요.\n")
+
+    user_id = "user123"
+    session_id = f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+
+    while True:
+        user_input = input("사용자: ")
+
+        if user_input.lower() in ["quit", "종료", "exit"]:
+            break
+
+        try:
+            response = agent.chat(user_input, user_id, session_id)
+            print(f"AI: {response}\n")
+        except Exception as e:
+            print(f"오류 발생: {e}\n")
+
+
 if __name__ == "__main__":
-    print("main")
-    ms = MemorySystem()
+    main()
