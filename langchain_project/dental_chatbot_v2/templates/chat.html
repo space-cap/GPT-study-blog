@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미소진 치과병원 - 온라인 상담</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 400px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chat-header h1 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.user .message-content {
+            background: #007bff;
+            color: white;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        #messageInput:focus {
+            border-color: #007bff;
+        }
+
+        #sendButton {
+            padding: 12px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        #sendButton:hover {
+            background: #0056b3;
+        }
+
+        #sendButton:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px 0;
+            color: #666;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .welcome-message {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🦷 미소진 치과병원</h1>
+            <p>온라인 상담 챗봇</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message">
+                <strong>안녕하세요! 미소진 치과병원입니다. 🙂</strong><br>
+                치료 상담이나 병원 정보가 궁금하신 점이 있으시면 언제든 말씀해주세요!
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            상담사가 입력 중입니다...
+        </div>
+
+        <div class="chat-input">
+            <div class="input-group">
+                <input type="text" id="messageInput" placeholder="메시지를 입력하세요..." maxlength="500">
+                <button id="sendButton">전송</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionId = null;
+
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = content.replace(/\n/g, '<br>');
+
+            messageDiv.appendChild(messageContent);
+            chatMessages.appendChild(messageDiv);
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTyping() {
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // 사용자 메시지 표시
+            addMessage(message, true);
+            messageInput.value = '';
+            sendButton.disabled = true;
+
+            // 입력 중 표시
+            showTyping();
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: sessionId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('서버 오류');
+                }
+
+                const data = await response.json();
+                sessionId = data.session_id;
+
+                // 봇 응답 표시
+                hideTyping();
+                addMessage(data.message);
+
+            } catch (error) {
+                hideTyping();
+                addMessage('죄송합니다. 일시적인 오류가 발생했습니다. 다시 시도해주세요.');
+            }
+
+            sendButton.disabled = false;
+            messageInput.focus();
+        }
+
+        // 이벤트 리스너
+        sendButton.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        messageInput.addEventListener('input', (e) => {
+            sendButton.disabled = !e.target.value.trim();
+        });
+
+        // 페이지 로드 시 입력창에 포커스
+        messageInput.focus();
+
+        // 초기 인사 메시지
+        setTimeout(() => {
+            addMessage('안녕하세요! 무엇을 도와드릴까요? 😊<br><br>• 병원 정보 및 위치<br>• 진료 항목 및 비용<br>• 상담 예약 신청<br><br>편하게 말씀해주세요!');
+        }, 1000);
+    </script>
+</body>
+
+</html>
