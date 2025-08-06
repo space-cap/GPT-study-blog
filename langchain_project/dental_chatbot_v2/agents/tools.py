@@ -17,8 +17,10 @@ logger = logging.getLogger(__name__)
 class VectorSearchTool(BaseTool):
     """벡터 검색 도구"""
 
-    name = "vector_search"
-    description = "병원 정보나 치료 정보를 검색합니다."
+    name: str = "vector_search"  # ✅ 수정: 타입 어노테이션 추가
+    description: str = (
+        "병원 정보나 치료 정보를 검색합니다."  # ✅ 수정: 타입 어노테이션 추가
+    )
 
     def __init__(self):
         super().__init__()
@@ -57,8 +59,10 @@ class VectorSearchTool(BaseTool):
 class IntentClassificationTool(BaseTool):
     """사용자 의도 분류 도구"""
 
-    name = "classify_intent"
-    description = "사용자 메시지의 의도를 분류합니다."
+    name: str = "classify_intent"  # ✅ 수정: 타입 어노테이션 추가
+    description: str = (
+        "사용자 메시지의 의도를 분류합니다."  # ✅ 수정: 타입 어노테이션 추가
+    )
 
     def _run(self, user_message: str) -> Dict[str, Any]:
         """의도 분류 실행"""
@@ -107,8 +111,10 @@ class IntentClassificationTool(BaseTool):
 class DataValidationTool(BaseTool):
     """데이터 유효성 검증 도구"""
 
-    name = "validate_data"
-    description = "사용자 입력 데이터의 유효성을 검증합니다."
+    name: str = "validate_data"  # ✅ 수정: 타입 어노테이션 추가
+    description: str = (
+        "사용자 입력 데이터의 유효성을 검증합니다."  # ✅ 수정: 타입 어노테이션 추가
+    )
 
     def __init__(self):
         super().__init__()
@@ -121,7 +127,7 @@ class DataValidationTool(BaseTool):
                 is_valid, result = self.validator.validate_name(data_value)
             elif data_type == "phone":
                 is_valid, result = self.validator.validate_phone(data_value)
-            elif data_type == "consent": # 동의
+            elif data_type == "consent":
                 is_valid, result = self.validator.validate_consent_response(data_value)
             else:
                 return {
@@ -143,8 +149,10 @@ class DataValidationTool(BaseTool):
 class DatabaseTool(BaseTool):
     """데이터베이스 작업 도구"""
 
-    name = "database_operation"
-    description = "데이터베이스에 고객 정보를 저장합니다."
+    name: str = "database_operation"  # ✅ 수정: 타입 어노테이션 추가
+    description: str = (
+        "데이터베이스에 고객 정보를 저장합니다."  # ✅ 수정: 타입 어노테이션 추가
+    )
 
     def __init__(self):
         super().__init__()
