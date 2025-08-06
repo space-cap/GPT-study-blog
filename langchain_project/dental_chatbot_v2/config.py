@@ -24,6 +24,7 @@ class Config:
 
     # Chroma 설정
     CHROMA_PERSIST_DIRECTORY = os.getenv("CHROMA_PERSIST_DIRECTORY", "./chroma_db")
+    CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "dental_clinic")
 
     # Redis 설정
     REDIS_PREFIX = os.getenv("REDIS_PREFIX", "dental_chatbot:")

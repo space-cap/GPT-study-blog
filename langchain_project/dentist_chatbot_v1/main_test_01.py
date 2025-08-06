@@ -102,7 +102,7 @@ load_dotenv()
 
 
 # --- OpenAI LLM 준비 (API Key 꼭 넣기!) ---
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.4)
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.1)
 
 
 # --- 유저 입력 대화 흐름 분기 함수 ---

@@ -47,9 +47,9 @@ class DatabaseManager:
                 result = connection.execute(
                     text(
                         """
-                    SELECT treatment_name, price, description, category
-                    FROM treatment_prices
-                    ORDER BY category, treatment_name
+                    SELECT service_name, default_cost, description, category
+                    FROM service_item
+                    ORDER BY category, service_name
                 """
                     )
                 )
@@ -79,8 +79,8 @@ class DatabaseManager:
                 connection.execute(
                     text(
                         """
-                    INSERT INTO customers (name, phone, consent_date, symptoms, created_at)
-                    VALUES (:name, :phone, :consent_date, :symptoms, NOW())
+                    INSERT INTO customer (name, phone_number, deleted)
+                    VALUES (:name, :phone, 'N')
                 """
                     ),
                     customer_data,
