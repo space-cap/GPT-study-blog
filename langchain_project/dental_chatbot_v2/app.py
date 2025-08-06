@@ -12,6 +12,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Dict, Any
+from contextlib import asynccontextmanager
 
 from agents.workflow import get_chatbot_workflow
 from agents.state import ConversationState
@@ -152,16 +153,18 @@ async def health_check():
     }
 
 
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """애플리케이션 시작 시 실행"""
+    print("시작")  # startup 로직
     logger.info("FastAPI 서버 시작")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
+    yield
     """애플리케이션 종료 시 실행"""
     logger.info("FastAPI 서버 종료")
+    print("종료")  # shutdown 로직
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 if __name__ == "__main__":
