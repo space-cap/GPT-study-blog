@@ -4,7 +4,7 @@ LangGraph 에이전트에서 사용할 도구들 정의
 
 import json
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from langchain.tools import BaseTool
 from core.vector_store import VectorStoreManager
 from core.session_manager import SessionManager
@@ -17,14 +17,16 @@ logger = logging.getLogger(__name__)
 class VectorSearchTool(BaseTool):
     """벡터 검색 도구"""
 
-    name: str = "vector_search"  # ✅ 수정: 타입 어노테이션 추가
-    description: str = (
-        "병원 정보나 치료 정보를 검색합니다."  # ✅ 수정: 타입 어노테이션 추가
-    )
+    name: str = "vector_search"
+    description: str = "병원 정보나 치료 정보를 검색합니다."
 
-    def __init__(self):
-        super().__init__()
-        self.vector_manager = VectorStoreManager()
+    # ✅ 수정: Pydantic 필드로 정의
+    vector_manager: Optional[VectorStoreManager] = None
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # ✅ 수정: object.__setattr__ 사용
+        object.__setattr__(self, "vector_manager", VectorStoreManager())
 
     def _run(self, query: str, search_type: str = "general") -> str:
         """벡터 검색 실행"""
@@ -59,14 +61,12 @@ class VectorSearchTool(BaseTool):
 class IntentClassificationTool(BaseTool):
     """사용자 의도 분류 도구"""
 
-    name: str = "classify_intent"  # ✅ 수정: 타입 어노테이션 추가
-    description: str = (
-        "사용자 메시지의 의도를 분류합니다."  # ✅ 수정: 타입 어노테이션 추가
-    )
+    name: str = "classify_intent"
+    description: str = "사용자 메시지의 의도를 분류합니다."
 
     def _run(self, user_message: str) -> Dict[str, Any]:
         """의도 분류 실행"""
-        # 간단한 키워드 기반 의도 분류 (실제로는 LLM 사용)
+        # 간단한 키워드 기반 의도 분류
         message = user_message.lower()
 
         if any(word in message for word in ["안녕", "안녕하세요", "처음", "반갑"]):
@@ -111,14 +111,16 @@ class IntentClassificationTool(BaseTool):
 class DataValidationTool(BaseTool):
     """데이터 유효성 검증 도구"""
 
-    name: str = "validate_data"  # ✅ 수정: 타입 어노테이션 추가
-    description: str = (
-        "사용자 입력 데이터의 유효성을 검증합니다."  # ✅ 수정: 타입 어노테이션 추가
-    )
+    name: str = "validate_data"
+    description: str = "사용자 입력 데이터의 유효성을 검증합니다."
 
-    def __init__(self):
-        super().__init__()
-        self.validator = DataValidator()
+    # ✅ 수정: Pydantic 필드로 정의
+    validator: Optional[DataValidator] = None
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # ✅ 수정: object.__setattr__ 사용
+        object.__setattr__(self, "validator", DataValidator())
 
     def _run(self, data_type: str, data_value: str) -> Dict[str, Any]:
         """데이터 유효성 검증 실행"""
@@ -149,14 +151,16 @@ class DataValidationTool(BaseTool):
 class DatabaseTool(BaseTool):
     """데이터베이스 작업 도구"""
 
-    name: str = "database_operation"  # ✅ 수정: 타입 어노테이션 추가
-    description: str = (
-        "데이터베이스에 고객 정보를 저장합니다."  # ✅ 수정: 타입 어노테이션 추가
-    )
+    name: str = "database_operation"
+    description: str = "데이터베이스에 고객 정보를 저장합니다."
 
-    def __init__(self):
-        super().__init__()
-        self.db_manager = DatabaseManager()
+    # ✅ 수정: Pydantic 필드로 정의
+    db_manager: Optional[DatabaseManager] = None
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # ✅ 수정: object.__setattr__ 사용
+        object.__setattr__(self, "db_manager", DatabaseManager())
 
     def _run(self, operation: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """데이터베이스 작업 실행"""
