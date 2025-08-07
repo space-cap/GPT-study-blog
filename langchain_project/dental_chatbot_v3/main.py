@@ -115,6 +115,8 @@ def run_chatbot():
     chat_history = []
 
     while True:
+        print(f"\n[DEBUG] 현재 수집된 정보: {collected_info}")  # 로그 추가
+
         # --- 최종 목표 달성 여부 확인 ---
         if (
             collected_info["name"]
