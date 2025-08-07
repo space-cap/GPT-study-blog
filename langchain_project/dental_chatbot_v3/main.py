@@ -4,8 +4,6 @@ from typing import Optional
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
-
-# [수정] pydantic_v1 대신 pydantic에서 직접 import 합니다.
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 
@@ -34,11 +32,10 @@ def run_chatbot():
     )
 
     # --- 2. 챗봇 모델 및 설정 초기화 ---
-    # OpenAI의 gpt-4o-mini 모델을 사용하고, JSON 모드를 활성화하여 구조화된 데이터 추출을 용이하게 합니다.
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
     structured_llm = llm.with_structured_output(CustomerInfo)
 
-    # --- 3. 챗봇의 역할과 목표를 정의하는 시스템 프롬프트 ---
+    # --- 3. 챗봇의 역할과 목표를 정의하는 시스템 프롬프트 (수정됨) ---
     system_prompt = """
     당신은 '스마일 치과'의 매우 친절하고 전문적인 상담 챗봇입니다. 
     당신의 가장 중요한 목표는 고객의 **이름**과 **전화번호**를 수집하여, 전문 상담원이 전화를 걸 수 있도록 하는 것입니다.
@@ -48,9 +45,13 @@ def run_chatbot():
     2. 고객이 예약, 비용, 진료 등 어떤 질문을 하더라도, 당신의 대답은 항상 이름과 전화번호를 물어보는 것으로 이어져야 합니다. 
        예시: "네, 자세한 상담을 위해 성함과 연락처를 남겨주시겠어요? 전문 상담원이 확인 후 바로 연락드리겠습니다."
     3. 정중하지만 끈기 있게 목표를 달성해야 합니다. 고객이 이름만 알려주면 전화번호를 물어보고, 전화번호만 알려주면 이름을 물어보세요.
-    4. 이름과 전화번호를 모두 얻기 전까지는 절대 `CustomerInfo` 형식으로 응답해서는 안 됩니다. 계속 대화를 이어가세요.
-    5. 이름과 전화번호를 모두 성공적으로 얻었을 때만 `CustomerInfo` 형식으로 정보를 추출하여 응답을 종료하세요.
-    6. 절대로 의학적인 질문에 직접 답변하지 마세요. 대신, "자세한 내용은 전문 상담원이 친절하게 안내해 드릴 예정입니다." 와 같이 응대하며 연락처를 요청하세요.
+    4. 절대로 의학적인 질문에 직접 답변하지 마세요. 대신, "자세한 내용은 전문 상담원이 친절하게 안내해 드릴 예정입니다." 와 같이 응대하며 연락처를 요청하세요.
+
+    **[매우 중요한 규칙]**
+    - 대화 내용에서 고객이 **실제 이름과 실제 전화번호를 명확하게 모두 언급했을 경우에만** `CustomerInfo` 형식으로 정보를 추출해야 합니다.
+    - 만약 이름과 전화번호 중 하나라도 빠져있거나, 명확하지 않다면, 절대 정보를 추출하지 말고 대화를 계속 이어나가세요.
+    - 예를 들어, 고객이 "임플란트 가격이 궁금해요" 라고만 말했다면, 이름과 전화번호 정보가 전혀 없으므로, "네, 가격 상담을 위해 성함과 연락처를 남겨주시겠어요?" 와 같이 응답하며 대화를 계속해야 합니다.
+    - 절대로 '고객의 이름'이나 '고객의 전화번호' 같은 설명 텍스트로 필드를 채워서는 안 됩니다.
     """
 
     # 대화 기록을 저장할 리스트
@@ -67,8 +68,6 @@ def run_chatbot():
             chat_history.append(HumanMessage(content=user_input))
 
             # --- 4. 정보 추출 시도 ---
-            # LLM에게 현재 대화 내용에서 CustomerInfo를 추출할 수 있는지 확인을 요청합니다.
-            # 5번의 시도 안에 정보를 추출하지 못하면 일반 대화로 전환합니다.
             try:
                 customer_info = structured_llm.invoke(
                     chat_history, config={"max_retries": 5}
