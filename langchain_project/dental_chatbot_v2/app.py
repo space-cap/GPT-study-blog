@@ -24,10 +24,23 @@ from config import Config
 setup_logging()
 logger = logging.getLogger(__name__)
 
-# FastAPI 앱 생성
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """애플리케이션 시작/종료 시 실행"""
+    logger.info("FastAPI 서버 시작")
+    yield
+    logger.info("FastAPI 서버 종료")
+
+
+# FastAPI 앱 생성 (lifespan 포함)
 app = FastAPI(
-    title="치과병원 챗봇 API", description="미소진 치과병원 상담 챗봇", version="1.0.0"
+    title="치과병원 챗봇 API",
+    description="미소진 치과병원 상담 챗봇",
+    version="1.0.0",
+    lifespan=lifespan,  # lifespan을 여기에 추가
 )
+
 
 # 정적 파일 및 템플릿 설정
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -151,20 +164,6 @@ async def health_check():
         "timestamp": datetime.now().isoformat(),
         "version": "1.0.0",
     }
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """애플리케이션 시작 시 실행"""
-    print("시작")  # startup 로직
-    logger.info("FastAPI 서버 시작")
-    yield
-    """애플리케이션 종료 시 실행"""
-    logger.info("FastAPI 서버 종료")
-    print("종료")  # shutdown 로직
-
-
-app = FastAPI(lifespan=lifespan)
 
 
 if __name__ == "__main__":
