@@ -4,7 +4,9 @@ from typing import Optional
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.pydantic_v1 import BaseModel, Field
+
+# [수정] pydantic_v1 대신 pydantic에서 직접 import 합니다.
+from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 
 # .env 파일에서 환경 변수 로드 (OPENAI_API_KEY)
