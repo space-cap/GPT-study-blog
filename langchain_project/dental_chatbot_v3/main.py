@@ -1,17 +1,18 @@
 import os
+import uuid
 from typing import Optional
 
+import mysql.connector
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from pydantic import BaseModel, Field
+from pantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 
-# .env 파일에서 환경 변수 로드 (OPENAI_API_KEY)
+# .env 파일에서 환경 변수 로드
 load_dotenv()
 
 
 # --- 1. 정보 '추출기'가 사용할 데이터 구조 ---
-# 이름, 전화번호 등 부분적인 정보만 담을 수 있도록 모든 필드를 Optional로 설정합니다.
 class PartialCustomerInfo(BaseModel):
     """고객의 이름 또는 전화번호 정보를 담는 데이터 구조입니다."""
 
@@ -21,9 +22,40 @@ class PartialCustomerInfo(BaseModel):
     )
 
 
+def save_chat_log(session_id, user_message, bot_response):
+    """
+    대화 내용을 데이터베이스의 chatbot_log 테이블에 저장합니다.
+    """
+    try:
+        # .env 파일의 정보로 데이터베이스에 연결
+        db_connection = mysql.connector.connect(
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME"),
+        )
+        cursor = db_connection.cursor()
+
+        insert_query = """
+        INSERT INTO chatbot_log (session_id, user_message, bot_response) 
+        VALUES (%s, %s, %s)
+        """
+        log_data = (session_id, user_message, bot_response)
+
+        cursor.execute(insert_query, log_data)
+        db_connection.commit()
+
+    except mysql.connector.Error as err:
+        print(f"\n[DB 저장 오류] {err}")
+    finally:
+        if "db_connection" in locals() and db_connection.is_connected():
+            cursor.close()
+            db_connection.close()
+
+
 def run_chatbot():
     """
-    대화의 상태를 관리하며 고객의 이름과 연락처를 수집하는 챗봇을 실행합니다.
+    대화의 상태를 관리하며 고객 정보를 수집하고, 대화 내용을 DB에 저장하는 챗봇을 실행합니다.
     """
     print(
         "🤖 안녕하세요! 스마일 치과 챗봇입니다. 무엇을 도와드릴까요? (종료하시려면 'exit'을 입력하세요)"
@@ -33,8 +65,10 @@ def run_chatbot():
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
     extraction_llm = llm.with_structured_output(PartialCustomerInfo)
 
+    # [신규 추가] 각 대화 세션을 구분하기 위한 고유 ID 생성
+    session_id = str(uuid.uuid4())
+
     # --- 3. '상태 관리자'가 사용할 저장 공간 ---
-    # 수집된 고객 정보를 기억하는 딕셔너리입니다.
     collected_info = {
         "name": None,
         "phone_number": None,
@@ -45,28 +79,32 @@ def run_chatbot():
     chat_history = []
 
     while True:
-        # --- 최종 목표 달성 여부 확인 ---
         if collected_info["name"] and collected_info["phone_number"]:
             print("\n✅ [상담 정보 수집 완료]")
             print(f"  - 고객명: {collected_info['name']}")
             print(f"  - 연락처: {collected_info['phone_number']}")
             print(f"  - 문의 사유: {collected_info['reason'] or 'N/A'}")
-            print("\n🤖 감사합니다! 전문 상담원이 곧 연락드리겠습니다.")
+
+            final_message = "감사합니다! 전문 상담원이 곧 연락드리겠습니다."
+            print(f"\n🤖 {final_message}")
+            # 마지막 대화 내용 저장
+            save_chat_log(session_id, "고객 정보 제공 완료", final_message)
             break
 
         user_input = input("🙂: ")
         if user_input.lower() == "exit":
             print("🤖 상담을 종료합니다. 이용해주셔서 감사합니다.")
+            save_chat_log(
+                session_id, user_input, "상담을 종료합니다. 이용해주셔서 감사합니다."
+            )
             break
 
-        # 첫 질문을 '문의 사유'로 저장
         if not collected_info["reason"]:
             collected_info["reason"] = user_input
 
         chat_history.append(HumanMessage(content=user_input))
 
         # --- 4. '정보 추출기' 실행 ---
-        # 사용자의 마지막 답변에서 이름이나 연락처를 추출 시도합니다.
         try:
             extracted_data = extraction_llm.invoke([HumanMessage(content=user_input)])
             if extracted_data.name and not collected_info["name"]:
@@ -76,15 +114,12 @@ def run_chatbot():
                 collected_info["phone_number"] = extracted_data.phone_number
                 print(f"🤖 [연락처: {extracted_data.phone_number} 확인되었습니다.]")
         except Exception:
-            # 추출할 정보가 없으면 그냥 넘어갑니다.
             pass
 
-        # 목표를 달성했는지 다시 확인
         if collected_info["name"] and collected_info["phone_number"]:
             continue
 
         # --- 5. '응답 생성기' 실행 ---
-        # 현재까지 수집된 정보(상태)를 바탕으로, 다음에 무엇을 물어볼지 결정합니다.
         system_prompt_for_response = f"""
         당신은 '스마일 치과'의 친절한 상담 챗봇입니다.
         당신의 목표는 고객의 이름과 전화번호를 수집하는 것입니다.
@@ -101,15 +136,15 @@ def run_chatbot():
         - 절대로 의학적 조언을 하지 마세요.
         """
 
-        messages_for_response = [
-            SystemMessage(content=system_prompt_for_response),
-        ]
-        # 대화의 흐름을 파악할 수 있도록 최근 대화 내용을 함께 전달합니다.
+        messages_for_response = [SystemMessage(content=system_prompt_for_response)]
         messages_for_response.extend(chat_history[-4:])
 
         ai_response = llm.invoke(messages_for_response)
         chat_history.append(ai_response)
         print(f"🤖: {ai_response.content}")
+
+        # [신규 추가] 매 대화 턴마다 로그 저장
+        save_chat_log(session_id, user_input, ai_response.content)
 
 
 if __name__ == "__main__":
