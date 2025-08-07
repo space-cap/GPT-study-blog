@@ -5,7 +5,7 @@ from typing import Optional
 import mysql.connector
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from pantic import BaseModel, Field
+from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 
 # .env 파일에서 환경 변수 로드
