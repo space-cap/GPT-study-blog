@@ -64,7 +64,7 @@ class ChatResponse(BaseModel):
     session_id: str
     conversation_stage: str
     requires_action: bool = False
-    action_type: str = None
+    action_type: Optional[str] = None  # ✅ 수정: Optional 타입 사용
 
 
 @app.get("/", response_class=HTMLResponse)
