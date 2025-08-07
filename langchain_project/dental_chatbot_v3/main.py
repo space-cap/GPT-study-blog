@@ -1,5 +1,6 @@
 import os
 import uuid
+import logging
 from typing import Optional
 
 import mysql.connector
@@ -11,9 +12,20 @@ from langchain_openai import ChatOpenAI
 # .env 파일에서 환경 변수 로드 (API 키, DB 정보 등)
 load_dotenv()
 
+# --- [신규 추가] 로깅 설정 ---
+# INFO 레벨 이상의 로그를 chatbot.log 파일과 콘솔에 함께 기록합니다.
+# 더 자세한 디버그 로그를 보려면 level을 logging.DEBUG로 변경하세요.
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("chatbot.log", encoding="utf-8"),
+        logging.StreamHandler(),
+    ],
+)
+
 
 # --- 1. 정보 '추출기'가 사용할 데이터 구조 ---
-# 이름과 전화번호만 추출하도록 역할을 명확히 합니다.
 class PartialCustomerInfo(BaseModel):
     """고객의 이름 또는 전화번호 정보를 담는 데이터 구조입니다."""
 
@@ -23,7 +35,6 @@ class PartialCustomerInfo(BaseModel):
     )
 
 
-# 동의 여부만 판단하기 위한 별도의 데이터 구조를 만듭니다.
 class ConsentInfo(BaseModel):
     """고객의 동의 여부를 판단하는 데이터 구조입니다."""
 
@@ -46,7 +57,7 @@ def save_chat_log(session_id, user_message, bot_response):
         cursor.execute(insert_query, (session_id, user_message, bot_response))
         db_connection.commit()
     except mysql.connector.Error as err:
-        print(f"\n[DB 저장 오류] {err}")
+        logging.error(f"[DB 저장 오류] chatbot_log 저장 실패: {err}")
     finally:
         if "db_connection" in locals() and db_connection.is_connected():
             cursor.close()
@@ -72,9 +83,11 @@ def save_inquiry_to_db(inquiry_data):
         )
         cursor.execute(insert_query, data)
         db_connection.commit()
-        print("\n[DB 저장 성공] 수집된 정보가 chatbot_inquiry 테이블에 저장되었습니다.")
+        logging.info(
+            "[DB 저장 성공] 수집된 정보가 chatbot_inquiry 테이블에 저장되었습니다."
+        )
     except mysql.connector.Error as err:
-        print(f"\n[DB 저장 오류] {err}")
+        logging.error(f"[DB 저장 오류] chatbot_inquiry 저장 실패: {err}")
     finally:
         if "db_connection" in locals() and db_connection.is_connected():
             cursor.close()
@@ -83,6 +96,7 @@ def save_inquiry_to_db(inquiry_data):
 
 def run_chatbot():
     """상태를 관리하며 고객 정보를 수집하고, 최종 결과를 DB에 저장하는 챗봇을 실행합니다."""
+    logging.info("=" * 20 + " 새로운 챗봇 세션 시작 " + "=" * 20)
     print(
         "🤖 안녕하세요! 스마일 치과 챗봇입니다. 무엇을 도와드릴까요? (종료하시려면 'exit'을 입력하세요)"
     )
@@ -91,6 +105,7 @@ def run_chatbot():
     info_extraction_llm = llm.with_structured_output(PartialCustomerInfo)
     consent_extraction_llm = llm.with_structured_output(ConsentInfo)
     session_id = str(uuid.uuid4())
+    logging.info(f"세션 ID 생성: {session_id}")
 
     collected_info = {
         "name": None,
@@ -101,16 +116,16 @@ def run_chatbot():
     chat_history = []
 
     while True:
-        # --- 최종 목표 달성 여부 확인 ---
+        logging.debug(f"현재 수집된 정보: {collected_info}")
         if (
             collected_info["name"]
             and collected_info["phone_number"]
             and collected_info["consent_agreed"]
         ):
-            print("\n✅ [상담 정보 수집 완료]")
-            print(f"  - 고객명: {collected_info['name']}")
-            print(f"  - 연락처: {collected_info['phone_number']}")
-            print(f"  - 문의 사유: {collected_info['reason'] or 'N/A'}")
+            logging.info("\n✅ [상담 정보 수집 완료]")
+            logging.info(f"  - 고객명: {collected_info['name']}")
+            logging.info(f"  - 연락처: {collected_info['phone_number']}")
+            logging.info(f"  - 문의 사유: {collected_info['reason'] or 'N/A'}")
 
             final_message = "감사합니다! 모든 정보가 확인되었습니다. 전문 상담원이 곧 연락드리겠습니다."
             print(f"\n🤖 {final_message}")
@@ -121,7 +136,7 @@ def run_chatbot():
 
         user_input = input("🙂: ")
         if user_input.lower() == "exit":
-            print("🤖 상담을 종료합니다. 이용해주셔서 감사합니다.")
+            logging.info("상담을 종료합니다. 이용해주셔서 감사합니다.")
             save_chat_log(session_id, user_input, "상담 종료")
             break
 
@@ -130,9 +145,7 @@ def run_chatbot():
 
         chat_history.append(HumanMessage(content=user_input))
 
-        # --- 정보 추출기 실행 (상태에 따라 다른 추출기 사용) ---
         try:
-            # 이름과 전화번호가 모두 수집된 상태에서는 '동의' 여부를 추출
             if collected_info["name"] and collected_info["phone_number"]:
                 consent_context = (
                     chat_history[-2:] if len(chat_history) >= 2 else chat_history
@@ -140,19 +153,21 @@ def run_chatbot():
                 extracted_consent = consent_extraction_llm.invoke(consent_context)
                 if extracted_consent.agreed and not collected_info["consent_agreed"]:
                     collected_info["consent_agreed"] = True
-                    print(f"🤖 [개인정보 수집 및 이용에 동의해주셨습니다.]")
-            # 아직 이름이나 전화번호를 수집 중인 상태
+                    logging.info("🤖 [개인정보 수집 및 이용에 동의해주셨습니다.]")
             else:
                 extracted_info = info_extraction_llm.invoke(
                     [HumanMessage(content=user_input)]
                 )
                 if extracted_info.name and not collected_info["name"]:
                     collected_info["name"] = extracted_info.name
-                    print(f"🤖 [이름: {extracted_info.name} 확인되었습니다.]")
+                    logging.info(f"🤖 [이름: {extracted_info.name} 확인되었습니다.]")
                 if extracted_info.phone_number and not collected_info["phone_number"]:
                     collected_info["phone_number"] = extracted_info.phone_number
-                    print(f"🤖 [연락처: {extracted_info.phone_number} 확인되었습니다.]")
-        except Exception:
+                    logging.info(
+                        f"🤖 [연락처: {extracted_info.phone_number} 확인되었습니다.]"
+                    )
+        except Exception as e:
+            logging.warning(f"정보 추출 중 예외 발생: {e}")
             pass
 
         if (
@@ -162,7 +177,6 @@ def run_chatbot():
         ):
             continue
 
-        # --- 응답 생성기 실행 ---
         next_prompt = ""
         if not collected_info["name"]:
             next_prompt = "정확한 상담을 위해 성함을 알려주시겠어요?"
@@ -195,3 +209,5 @@ def run_chatbot():
 
 if __name__ == "__main__":
     run_chatbot()
+    logging.info("=" * 20 + " 챗봇 세션 종료 " + "=" * 20)
+    
