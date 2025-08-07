@@ -13,6 +13,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Dict, Any
 from contextlib import asynccontextmanager
+from typing import Optional
 
 from agents.workflow import get_chatbot_workflow
 from agents.state import ConversationState
@@ -55,7 +56,7 @@ chatbot_workflow = get_chatbot_workflow()
 # 요청/응답 모델
 class ChatRequest(BaseModel):
     message: str
-    session_id: str = None
+    session_id: Optional[str] = None  # ✅ Optional 타입 사용
 
 
 class ChatResponse(BaseModel):
@@ -75,6 +76,10 @@ async def home(request: Request):
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """채팅 API 엔드포인트"""
+    logger.info(f"받은 요청 데이터: {request}")  # 디버깅용
+    logger.info(f"메시지: {request.message}")
+    logger.info(f"세션ID: {request.session_id}")
+
     try:
         # 세션 ID 생성 또는 기존 세션 사용
         session_id = request.session_id or str(uuid.uuid4())
