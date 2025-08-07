@@ -5,7 +5,7 @@ from typing import Optional
 import mysql.connector
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 
 # .env 파일에서 환경 변수 로드 (API 키, DB 정보 등)
@@ -13,22 +13,28 @@ load_dotenv()
 
 
 # --- 1. 정보 '추출기'가 사용할 데이터 구조 ---
+# 이름과 전화번호만 추출하도록 역할을 명확히 합니다.
 class PartialCustomerInfo(BaseModel):
-    """고객의 이름, 전화번호, 동의 여부 정보를 담는 데이터 구조입니다."""
+    """고객의 이름 또는 전화번호 정보를 담는 데이터 구조입니다."""
 
     name: Optional[str] = Field(None, description="대화에서 추출한 고객의 이름")
     phone_number: Optional[str] = Field(
         None, description="대화에서 추출한 고객의 전화번호"
     )
-    consent_agreed: Optional[bool] = Field(
-        None, description="고객의 개인정보 수집 동의 여부 (예, 네, 동의합니다 -> True)"
+
+
+# 동의 여부만 판단하기 위한 별도의 데이터 구조를 만듭니다.
+class ConsentInfo(BaseModel):
+    """고객의 동의 여부를 판단하는 데이터 구조입니다."""
+
+    agreed: bool = Field(
+        description="고객이 긍정적으로 답변했는지 여부 (예, 네, 동의합니다 -> True)"
     )
 
 
 def save_chat_log(session_id, user_message, bot_response):
     """대화 내용을 데이터베이스의 chatbot_log 테이블에 저장합니다."""
     try:
-        # .env 파일의 정보로 데이터베이스에 연결
         db_connection = mysql.connector.connect(
             host=os.getenv("DB_HOST"),
             user=os.getenv("DB_USER"),
@@ -36,16 +42,9 @@ def save_chat_log(session_id, user_message, bot_response):
             database=os.getenv("DB_NAME"),
         )
         cursor = db_connection.cursor()
-
-        insert_query = """
-        INSERT INTO chatbot_log (session_id, user_message, bot_response) 
-        VALUES (%s, %s, %s)
-        """
-        log_data = (session_id, user_message, bot_response)
-
-        cursor.execute(insert_query, log_data)
+        insert_query = "INSERT INTO chatbot_log (session_id, user_message, bot_response) VALUES (%s, %s, %s)"
+        cursor.execute(insert_query, (session_id, user_message, bot_response))
         db_connection.commit()
-
     except mysql.connector.Error as err:
         print(f"\n[DB 저장 오류] {err}")
     finally:
@@ -64,22 +63,16 @@ def save_inquiry_to_db(inquiry_data):
             database=os.getenv("DB_NAME"),
         )
         cursor = db_connection.cursor()
-
-        insert_query = """
-        INSERT INTO chatbot_inquiry (customer_name, phone_number, inquiry_reason, consent_agreed) 
-        VALUES (%s, %s, %s, %s)
-        """
+        insert_query = "INSERT INTO chatbot_inquiry (customer_name, phone_number, inquiry_reason, consent_agreed) VALUES (%s, %s, %s, %s)"
         data = (
             inquiry_data["name"],
             inquiry_data["phone_number"],
             inquiry_data["reason"],
             "Y" if inquiry_data["consent_agreed"] else "N",
         )
-
         cursor.execute(insert_query, data)
         db_connection.commit()
         print("\n[DB 저장 성공] 수집된 정보가 chatbot_inquiry 테이블에 저장되었습니다.")
-
     except mysql.connector.Error as err:
         print(f"\n[DB 저장 오류] {err}")
     finally:
@@ -95,20 +88,20 @@ def run_chatbot():
     )
 
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-    extraction_llm = llm.with_structured_output(PartialCustomerInfo)
+    info_extraction_llm = llm.with_structured_output(PartialCustomerInfo)
+    consent_extraction_llm = llm.with_structured_output(ConsentInfo)
     session_id = str(uuid.uuid4())
 
     collected_info = {
         "name": None,
         "phone_number": None,
         "reason": None,
-        "consent_agreed": None,  # 동의 여부 상태 추가
+        "consent_agreed": None,
     }
     chat_history = []
 
     while True:
         # --- 최종 목표 달성 여부 확인 ---
-        print(f"\n[DEBUG] 현재 수집된 정보: {collected_info}")  # 로그 추가
         if (
             collected_info["name"]
             and collected_info["phone_number"]
@@ -123,7 +116,7 @@ def run_chatbot():
             print(f"\n🤖 {final_message}")
 
             save_chat_log(session_id, "개인정보 수집 동의 완료", final_message)
-            save_inquiry_to_db(collected_info)  # 최종 정보 DB 저장
+            save_inquiry_to_db(collected_info)
             break
 
         user_input = input("🙂: ")
@@ -137,23 +130,28 @@ def run_chatbot():
 
         chat_history.append(HumanMessage(content=user_input))
 
-        # --- 정보 추출기 실행 ---
+        # --- 정보 추출기 실행 (상태에 따라 다른 추출기 사용) ---
         try:
-            # [수정] 사용자의 답변만 보내는 대신, 직전의 대화 내용(맥락)을 함께 전달합니다.
-            extraction_context = (
-                chat_history[-2:] if len(chat_history) >= 2 else chat_history
-            )
-            extracted_data = extraction_llm.invoke(extraction_context)
-
-            if extracted_data.name and not collected_info["name"]:
-                collected_info["name"] = extracted_data.name
-                print(f"🤖 [이름: {extracted_data.name} 확인되었습니다.]")
-            if extracted_data.phone_number and not collected_info["phone_number"]:
-                collected_info["phone_number"] = extracted_data.phone_number
-                print(f"🤖 [연락처: {extracted_data.phone_number} 확인되었습니다.]")
-            if extracted_data.consent_agreed and not collected_info["consent_agreed"]:
-                collected_info["consent_agreed"] = True
-                print(f"🤖 [개인정보 수집 및 이용에 동의해주셨습니다.]")
+            # 이름과 전화번호가 모두 수집된 상태에서는 '동의' 여부를 추출
+            if collected_info["name"] and collected_info["phone_number"]:
+                consent_context = (
+                    chat_history[-2:] if len(chat_history) >= 2 else chat_history
+                )
+                extracted_consent = consent_extraction_llm.invoke(consent_context)
+                if extracted_consent.agreed and not collected_info["consent_agreed"]:
+                    collected_info["consent_agreed"] = True
+                    print(f"🤖 [개인정보 수집 및 이용에 동의해주셨습니다.]")
+            # 아직 이름이나 전화번호를 수집 중인 상태
+            else:
+                extracted_info = info_extraction_llm.invoke(
+                    [HumanMessage(content=user_input)]
+                )
+                if extracted_info.name and not collected_info["name"]:
+                    collected_info["name"] = extracted_info.name
+                    print(f"🤖 [이름: {extracted_info.name} 확인되었습니다.]")
+                if extracted_info.phone_number and not collected_info["phone_number"]:
+                    collected_info["phone_number"] = extracted_info.phone_number
+                    print(f"🤖 [연락처: {extracted_info.phone_number} 확인되었습니다.]")
         except Exception:
             pass
 
