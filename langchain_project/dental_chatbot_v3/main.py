@@ -125,6 +125,8 @@ def run_chatbot():
 
     # --- 메인 대화 루프 ---
     while True:
+        logging.debug(f"현재 수집된 정보: {collected_info}")
+
         # 목표(이름, 전화번호, 동의)를 달성했는지 매번 확인합니다.
         if (
             collected_info["name"]
@@ -229,4 +231,3 @@ def run_chatbot():
 if __name__ == "__main__":
     run_chatbot()
     logging.info("=" * 20 + " 챗봇 세션 종료 " + "=" * 20)
-    
