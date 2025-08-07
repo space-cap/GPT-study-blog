@@ -5,7 +5,7 @@ from typing import Optional
 import mysql.connector
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from langchain_openai import ChatOpenAI
 
 # .env 파일에서 환경 변수 로드 (API 키, DB 정보 등)
@@ -13,8 +13,6 @@ load_dotenv()
 
 
 # --- 1. 정보 '추출기'가 사용할 데이터 구조 ---
-# 사용자의 답변에서 이름이나 전화번호를 추출하기 위한 Pydantic 모델입니다.
-# 모든 필드를 Optional로 설정하여, 부분적인 정보만 있어도 추출할 수 있도록 합니다.
 class PartialCustomerInfo(BaseModel):
     """고객의 이름, 전화번호, 동의 여부 정보를 담는 데이터 구조입니다."""
 
@@ -28,11 +26,9 @@ class PartialCustomerInfo(BaseModel):
 
 
 def save_chat_log(session_id, user_message, bot_response):
-    """
-    대화 내용을 데이터베이스의 chatbot_log 테이블에 저장합니다.
-    """
+    """대화 내용을 데이터베이스의 chatbot_log 테이블에 저장합니다."""
     try:
-        # .env 파일에 설정된 정보로 데이터베이스에 연결합니다.
+        # .env 파일의 정보로 데이터베이스에 연결
         db_connection = mysql.connector.connect(
             host=os.getenv("DB_HOST"),
             user=os.getenv("DB_USER"),
@@ -41,22 +37,18 @@ def save_chat_log(session_id, user_message, bot_response):
         )
         cursor = db_connection.cursor()
 
-        # SQL INSERT 쿼리를 정의합니다.
         insert_query = """
         INSERT INTO chatbot_log (session_id, user_message, bot_response) 
         VALUES (%s, %s, %s)
         """
         log_data = (session_id, user_message, bot_response)
 
-        # 쿼리를 실행하고 변경사항을 커밋합니다.
         cursor.execute(insert_query, log_data)
         db_connection.commit()
 
     except mysql.connector.Error as err:
-        # 데이터베이스 오류 발생 시 메시지를 출력합니다.
         print(f"\n[DB 저장 오류] {err}")
     finally:
-        # 연결을 안전하게 닫습니다.
         if "db_connection" in locals() and db_connection.is_connected():
             cursor.close()
             db_connection.close()
@@ -115,9 +107,8 @@ def run_chatbot():
     chat_history = []
 
     while True:
-        print(f"\n[DEBUG] 현재 수집된 정보: {collected_info}")  # 로그 추가
-
         # --- 최종 목표 달성 여부 확인 ---
+        print(f"\n[DEBUG] 현재 수집된 정보: {collected_info}")  # 로그 추가
         if (
             collected_info["name"]
             and collected_info["phone_number"]
@@ -148,7 +139,12 @@ def run_chatbot():
 
         # --- 정보 추출기 실행 ---
         try:
-            extracted_data = extraction_llm.invoke([HumanMessage(content=user_input)])
+            # [수정] 사용자의 답변만 보내는 대신, 직전의 대화 내용(맥락)을 함께 전달합니다.
+            extraction_context = (
+                chat_history[-2:] if len(chat_history) >= 2 else chat_history
+            )
+            extracted_data = extraction_llm.invoke(extraction_context)
+
             if extracted_data.name and not collected_info["name"]:
                 collected_info["name"] = extracted_data.name
                 print(f"🤖 [이름: {extracted_data.name} 확인되었습니다.]")
