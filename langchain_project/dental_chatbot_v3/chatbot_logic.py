@@ -8,19 +8,13 @@ from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
+from utils.logging_config import setup_logging  # [수정] 로깅 설정 import
 
 # .env 파일에서 환경 변수 로드
 load_dotenv()
 
-# 로깅 설정
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("chatbot.log", encoding="utf-8"),
-        logging.StreamHandler(),
-    ],
-)
+# [수정] 로깅 설정 함수 호출
+setup_logging()
 
 
 # --- 데이터 구조 정의 ---
