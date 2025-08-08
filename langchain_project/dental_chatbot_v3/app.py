@@ -1,10 +1,14 @@
 import uuid
+import logging
 from fastapi import FastAPI
 from pydantic import BaseModel
 from chatbot_logic import process_chat_turn
+from utils.logging_config import setup_logging
 
 # [신규 추가] CORS 미들웨어를 사용하기 위해 import 합니다.
 from fastapi.middleware.cors import CORSMiddleware
+
+setup_logging()
 
 # FastAPI 애플리케이션 생성
 app = FastAPI(
@@ -52,11 +56,13 @@ def chat_with_bot(request: ChatRequest):
     챗봇과 대화를 주고받는 메인 API 엔드포인트입니다.
     """
     session_id = request.session_id or str(uuid.uuid4())
+    logging.info(f"세션 ID 생성: {session_id}")
 
     # 세션이 없으면 새로 생성
     if session_id not in sessions:
         sessions[session_id] = {
             "collected_info": {
+                "session_id": session_id,  # session_id 추가
                 "name": None,
                 "phone_number": None,
                 "reason": None,

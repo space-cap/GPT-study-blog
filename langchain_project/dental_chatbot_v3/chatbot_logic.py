@@ -44,8 +44,41 @@ def save_chat_log(session_id, user_message, bot_response):
 
 
 def save_inquiry_to_db(inquiry_data):
-    """수집된 최종 문의 정보를 DB에 저장합니다."""
-    # ... (이전과 동일)
+    """수집된 최종 문의 정보를 chatbot_inquiry 테이블에 저장합니다."""
+    try:
+        db_connection = mysql.connector.connect(
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME"),
+        )
+        cursor = db_connection.cursor()
+
+        # [수정] session_id를 함께 저장하도록 쿼리 변경
+        insert_query = """
+        INSERT INTO chatbot_inquiry (session_id, customer_name, phone_number, inquiry_reason, consent_agreed) 
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        data = (
+            inquiry_data["session_id"],  # session_id 추가
+            inquiry_data["name"],
+            inquiry_data["phone_number"],
+            inquiry_data["reason"],
+            "Y" if inquiry_data["consent_agreed"] else "N",
+        )
+
+        cursor.execute(insert_query, data)
+        db_connection.commit()
+        logging.info(
+            "[DB 저장 성공] 수집된 정보가 chatbot_inquiry 테이블에 저장되었습니다."
+        )
+
+    except mysql.connector.Error as err:
+        logging.error(f"[DB 저장 오류] chatbot_inquiry 저장 실패: {err}")
+    finally:
+        if "db_connection" in locals() and db_connection.is_connected():
+            cursor.close()
+            db_connection.close()
 
 
 def process_chat_turn(
