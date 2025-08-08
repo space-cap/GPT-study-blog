@@ -18,8 +18,8 @@ def download_youtube_video_720p(video_url, download_path="./downloads"):
         print(f"👤 채널: {yt.author}")
 
         # 720p 해상도 스트림 선택
-        video_stream = yt.streams.filter(res="720p", file_extension="mp4").first()
-        # video_stream = yt.streams.filter(res="360p", file_extension="mp4").first()
+        # video_stream = yt.streams.filter(res="720p", file_extension="mp4").first()
+        video_stream = yt.streams.filter(res="360p", file_extension="mp4").first()
 
         if video_stream is None:
             print("❌ 720p 해상도를 찾을 수 없습니다.")
@@ -47,8 +47,7 @@ def download_youtube_video_720p(video_url, download_path="./downloads"):
 # video_url = "https://www.youtube.com/watch?v=W_uwR_yx4-c&t=3117s"
 # video_url = "https://www.youtube.com/live/cg2nlJaiqLk"
 # video_url = "https://www.youtube.com/watch?v=Xmf3NbC2ONs"
-video_url = (
-    "https://www.youtube.com/watch?v=IAyMtl9FRHI&list=RDIAyMtl9FRHI&start_radio=1"
-)
+# video_url = ("https://www.youtube.com/watch?v=IAyMtl9FRHI&list=RDIAyMtl9FRHI&start_radio=1")
+video_url = "https://www.youtube.com/live/KAJAbD_4aEw"
 
 download_youtube_video_720p(video_url)
