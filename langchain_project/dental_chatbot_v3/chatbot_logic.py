@@ -8,17 +8,19 @@ from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
-from utils.logging_config import setup_logging  # [수정] 로깅 설정 import
+from utils.logging_config import setup_logging
 
 # .env 파일에서 환경 변수 로드
 load_dotenv()
 
-# [수정] 로깅 설정 함수 호출
+# 로깅 설정 실행
 setup_logging()
 
 
 # --- 데이터 구조 정의 ---
 class PartialCustomerInfo(BaseModel):
+    """고객의 이름 또는 전화번호 정보를 담는 데이터 구조입니다."""
+
     name: Optional[str] = Field(None, description="대화에서 추출한 고객의 이름")
     phone_number: Optional[str] = Field(
         None, description="대화에서 추출한 고객의 전화번호"
@@ -26,21 +28,38 @@ class PartialCustomerInfo(BaseModel):
 
 
 class ConsentInfo(BaseModel):
+    """고객의 동의 여부를 판단하는 데이터 구조입니다."""
+
     agreed: bool = Field(
         description="고객이 긍정적으로 답변했는지 여부 (예, 네, 동의합니다 -> True)"
     )
 
 
 # --- 전역 LLM 인스턴스 ---
-# 애플리케이션 시작 시 한 번만 초기화하여 재사용합니다.
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 info_extraction_llm = llm.with_structured_output(PartialCustomerInfo)
 consent_extraction_llm = llm.with_structured_output(ConsentInfo)
 
 
 def save_chat_log(session_id, user_message, bot_response):
-    """대화 내용을 데이터베이스에 저장합니다."""
-    # ... (이전과 동일)
+    """대화 내용을 데이터베이스의 chatbot_log 테이블에 저장합니다."""
+    try:
+        db_connection = mysql.connector.connect(
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME"),
+        )
+        cursor = db_connection.cursor()
+        insert_query = "INSERT INTO chatbot_log (session_id, user_message, bot_response) VALUES (%s, %s, %s)"
+        cursor.execute(insert_query, (session_id, user_message, bot_response))
+        db_connection.commit()
+    except mysql.connector.Error as err:
+        logging.error(f"[DB 저장 오류] chatbot_log 저장 실패: {err}")
+    finally:
+        if "db_connection" in locals() and db_connection.is_connected():
+            cursor.close()
+            db_connection.close()
 
 
 def save_inquiry_to_db(inquiry_data):
@@ -53,26 +72,24 @@ def save_inquiry_to_db(inquiry_data):
             database=os.getenv("DB_NAME"),
         )
         cursor = db_connection.cursor()
-
-        # [수정] session_id를 함께 저장하도록 쿼리 변경
+        # [수정] inquiry_status를 함께 저장하도록 쿼리 변경
         insert_query = """
-        INSERT INTO chatbot_inquiry (session_id, customer_name, phone_number, inquiry_reason, consent_agreed) 
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO chatbot_inquiry (session_id, customer_name, phone_number, inquiry_reason, consent_agreed, inquiry_status) 
+        VALUES (%s, %s, %s, %s, %s, %s)
         """
         data = (
-            inquiry_data["session_id"],  # session_id 추가
+            inquiry_data["session_id"],
             inquiry_data["name"],
             inquiry_data["phone_number"],
             inquiry_data["reason"],
             "Y" if inquiry_data["consent_agreed"] else "N",
+            "대기중",  # 기본 상태값 추가
         )
-
         cursor.execute(insert_query, data)
         db_connection.commit()
         logging.info(
             "[DB 저장 성공] 수집된 정보가 chatbot_inquiry 테이블에 저장되었습니다."
         )
-
     except mysql.connector.Error as err:
         logging.error(f"[DB 저장 오류] chatbot_inquiry 저장 실패: {err}")
     finally:
@@ -123,7 +140,11 @@ def process_chat_turn(
         pass
 
     # --- 최종 목표 달성 시 ---
-    if all(collected_info.values()):
+    # [수정] 'reason'을 제외한 모든 필수값이 None이 아닌지 확인
+    is_complete = all(
+        value is not None for key, value in collected_info.items() if key != "reason"
+    )
+    if is_complete:
         final_message = (
             "감사합니다! 모든 정보가 확인되었습니다. 전문 상담원이 곧 연락드리겠습니다."
         )
@@ -146,8 +167,10 @@ def process_chat_turn(
     - 이름: {collected_info['name'] or '아직 모름'}
     - 전화번호: {collected_info['phone_number'] or '아직 모름'}
     - 개인정보 동의: {'동의함' if collected_info['consent_agreed'] else '아직 안 함'}
+
     [당신의 임무]
     - "{next_prompt}" 이 질문을 중심으로 고객에게 자연스럽고 친절하게 응답하세요.
+    - 고객이 다른 질문을 하면, "네, 그 부분은 전문 상담원이 자세히 안내해 드릴 거예요." 라고 부드럽게 응대한 후, 원래 목표 질문으로 돌아오세요.
     """
 
     messages_for_response = [SystemMessage(content=system_prompt_for_response)]
