@@ -16,3 +16,11 @@
 /langchain_project/dental_chatbot_v2/prompts/__pycache__
 langchain_project/dental_chatbot.log
 langchain_project/chatbot.log
+langchain_project/dental_chatbot_v3/__pycache__
+venv/
+.env
+.cache/
+.streamlit/
+.vscode/
+chroma_db/
+__pycache__/
