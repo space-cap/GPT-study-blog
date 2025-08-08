@@ -24,3 +24,4 @@ venv/
 .vscode/
 chroma_db/
 __pycache__/
+/langchain_project/dental_chatbot_v3/logs

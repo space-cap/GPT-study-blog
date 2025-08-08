@@ -3,12 +3,30 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from chatbot_logic import process_chat_turn
 
+# [신규 추가] CORS 미들웨어를 사용하기 위해 import 합니다.
+from fastapi.middleware.cors import CORSMiddleware
+
 # FastAPI 애플리케이션 생성
 app = FastAPI(
     title="Smile Dental Chatbot API",
     description="고객 정보 수집을 위한 AI 챗봇 API",
     version="1.0.0",
 )
+
+# --- [신규 추가] CORS 설정 ---
+# 허용할 출처(웹페이지 주소) 목록을 정의합니다.
+origins = [
+    "http://localhost:8080",  # Spring Boot 애플리케이션의 주소
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # 위에서 정의한 출처 목록
+    allow_credentials=True,
+    allow_methods=["*"],  # 모든 HTTP 메소드 허용 (GET, POST 등)
+    allow_headers=["*"],  # 모든 HTTP 헤더 허용
+)
+# -----------------------------
 
 # 세션 데이터를 서버 메모리에 저장하기 위한 딕셔너리
 # 실제 프로덕션 환경에서는 Redis와 같은 외부 저장소를 사용하는 것이 좋습니다.
