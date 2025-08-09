@@ -25,3 +25,4 @@ venv/
 chroma_db/
 __pycache__/
 /langchain_project/dental_chatbot_v3/logs
+/langchain_project/lee/20250630_더존비즈온_results
